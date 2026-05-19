@@ -696,7 +696,7 @@ Empresa: Tático Performance (MEI). Gestor: Thiago Saldini Salim — publicitár
 O que é: Arena de beach tennis e treino funcional na areia — Nova Campinas, Campinas-SP. Instagram: @novabeach.cps. Site: novabeach.com.br. Cor principal: #C8D400 (verde-limão neon). Tom: Energético, comunitário, aspiracional. Serviços: Social Media (R$1.000/mês) + Tráfego Pago (R$1.000/mês) + CRM (R$1.000/mês). Ad account Meta: act_3801989686713911. Instagram ID: 17841449062403565.
 
 ### Arena Publicidade
-O que é: Empresa de brindes corporativos e licenciamento de personagens (Turma da Mônica, etc.) para kits promocionais B2B. Mercado: Licenciamento B2B — ticket médio ~R$40.000. Tom: Profissional, consultivo, estratégico. Serviços: Tráfego Pago (R$1.000/mês) + VÓRTEX (R$500/mês) = R$1.500/mês. Ad account Meta: act_604987865349440. VÓRTEX: https://meta-arena.vercel.app
+O que é: Empresa de brindes corporativos e licenciamento de personagens (Turma da Mônica, etc.) para kits promocionais B2B. Mercado: Licenciamento B2B — ticket médio ~R$40.000. Tom: Profissional, consultivo, estratégico. Serviços: Tráfego Pago (R$1.000/mês) + VÓRTEX (R$500/mês) = R$1.500/mês. Ad account Meta: act_604987865349440. VÓRTEX: https://assistente-claude.vercel.app
 
 ### Bowa Bar (prospect ativo)
 O que é: Bar em Campinas — proposta de inteligência financeira automatizada (sistema Zig PDV). Status: Proposta enviada — aguardando retorno. Valor: R$4.000/mês.
@@ -826,7 +826,7 @@ Nunca esconder resultados ruins — contextualizar e apresentar solução junto.
 | Viva Beauty | Fluxos CRM completos (Shopify + Reportana) |
 
 ## SISTEMAS ATIVOS
-VÓRTEX Intelligence Platform: https://meta-arena.vercel.app — 9 módulos (Campanhas, Criativos, Demográficos, UTM, Brief, Tracking, Budget Protector, Squads IA, Base Conhecimento).
+VÓRTEX Intelligence Platform: https://assistente-claude.vercel.app — 9 módulos (Campanhas, Criativos, Demográficos, UTM, Brief, Tracking, Budget Protector, Squads IA, Base Conhecimento).
 Alfred Daily Report: Todo dia às 8h. Contas: Nova Beach (act_3801989686713911) + Arena (act_604987865349440).
 Regras inegociáveis: 8 layers antes de qualquer ação | Layer 6 sempre protegido | source_instagram_media_id obrigatório | nunca criar campanhas do zero.
 
@@ -908,7 +908,7 @@ Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento c
         <div class="bitem" onclick="ask('Estratégia completa LinkedIn Ads para Arena Publicidade. Segmentação ideal, formato, orçamento recomendado, copy para B2B licenciamento. Meta: gerar leads qualificados R$100k+/mês em tickets.')">Estratégia LinkedIn</div>
         <div class="bitem" onclick="ask('Gera relatório executivo semanal para Arena Publicidade. Estrutura: Resumo Executivo (3 linhas), Métricas vs semana anterior (tabela), Top 3 criativos, Pontos de atenção com plano, Próximos 5 passos.')">Relatório semanal</div>
         <a href="https://business.facebook.com/adsmanager/manage/campaigns?act=604987865349440" target="_blank" class="blink">Meta Ads Manager</a>
-        <a href="https://meta-arena.vercel.app" target="_blank" class="blink">VÓRTEX Platform</a>
+        <a href="https://assistente-claude.vercel.app" target="_blank" class="blink">VÓRTEX Platform</a>
       </div>
 
       <!-- Sprint do Dia -->
@@ -1526,7 +1526,7 @@ Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento c
     <button class="abtn" onclick="saveToObsidian()" title="Salva a última resposta do Alfred no Obsidian">
       <span class="ic">🧠</span>Salvar Obsidian
     </button>
-    <button class="abtn" onclick="window.open('https://meta-arena.vercel.app','_blank')">
+    <button class="abtn" onclick="window.open('https://assistente-claude.vercel.app','_blank')">
       <span class="ic">📊</span>VÓRTEX
     </button>
     <button class="abtn" onclick="window.open('https://app.clickup.com','_blank')">
@@ -2225,7 +2225,7 @@ function setMode(mode){
 }
 
 // ── VÓRTEX — META ADS LIVE DATA ──
-const VX_PROXY = 'https://meta-arena.vercel.app/api/meta';
+const VX_PROXY = location.protocol === 'https:' ? '/api/meta' : 'https://meta-arena-lac.vercel.app/api/meta';
 
 function vxEl(id){ return document.getElementById(id); }
 
@@ -2463,7 +2463,7 @@ function crGenerate(type){
 }
 
 // ── TRACKER ──
-const TK_PROXY = location.protocol === 'https:' ? '/api/fetch-site' : 'https://meta-arena.vercel.app/api/fetch-site';
+const TK_PROXY = location.protocol === 'https:' ? '/api/fetch-site' : 'https://meta-arena-lac.vercel.app/api/fetch-site';
 let tkLastHTML = '';
 let tkLastURL  = '';
 
