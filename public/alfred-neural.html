@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALFRED — Tático Performance</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#000813;font-family:'Courier New',monospace;
+  color:#00d4ff;height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;user-select:none;
+}
+canvas{position:fixed;top:0;left:0;z-index:0;pointer-events:none}
+
+/* ── SCAN LINES ── */
+.scan{position:fixed;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent 0%,#00d4ff08 20%,#00d4ff28 50%,#00d4ff08 80%,transparent 100%);
+  animation:scan 9s linear infinite;z-index:1;pointer-events:none;
+  box-shadow:0 0 8px #00d4ff15}
+@keyframes scan{from{top:-3px}to{top:100vh}}
+
+.scan2{position:fixed;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,#00d4ff04 30%,#00d4ff12 50%,#00d4ff04 70%,transparent 100%);
+  animation:scan 9s linear infinite 4.5s;z-index:1;pointer-events:none}
+
+/* ── CORNERS ── */
+.corner{position:fixed;width:28px;height:28px;z-index:20}
+.corner-tl{top:14px;left:14px;border-top:1px solid #00d4ff30;border-left:1px solid #00d4ff30}
+.corner-tr{top:14px;right:14px;border-top:1px solid #00d4ff30;border-right:1px solid #00d4ff30}
+.corner-bl{bottom:14px;left:14px;border-bottom:1px solid #00d4ff30;border-left:1px solid #00d4ff30}
+.corner-br{bottom:14px;right:14px;border-bottom:1px solid #00d4ff30;border-right:1px solid #00d4ff30}
+
+/* ── NEURAL LOAD BAR ── */
+.neural-load-bar{
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:transparent;overflow:hidden;
+}
+.neural-load-fill{
+  height:100%;width:30%;
+  background:linear-gradient(90deg,transparent,#00d4ff60,#00d4ffcc,#00d4ff60,transparent);
+  animation:neuralload 2.8s ease-in-out infinite;
+  border-radius:2px;
+}
+@keyframes neuralload{
+  0%{width:0%;margin-left:0%;opacity:0}
+  10%{opacity:1}
+  50%{width:40%;margin-left:30%}
+  90%{opacity:1}
+  100%{width:0%;margin-left:100%;opacity:0}
+}
+body.thinking .neural-load-fill{
+  background:linear-gradient(90deg,transparent,#9b59b660,#9b59b6cc,#9b59b660,transparent);
+  animation:neuralload .8s ease-in-out infinite;
+}
+body.listening .neural-load-fill{
+  background:linear-gradient(90deg,transparent,#00c97a60,#00c97acc,#00c97a60,transparent);
+  animation:neuralload 1.2s ease-in-out infinite;
+}
+body.speaking .neural-load-fill{
+  background:linear-gradient(90deg,transparent,#ff6b0060,#ff6b00cc,#ff6b0060,transparent);
+  animation:neuralload .6s ease-in-out infinite;
+}
+
+/* ── TOP BAR ── */
+.top-bar{
+  flex:0 0 44px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 52px;
+  border-bottom:1px solid #00d4ff15;
+  background:rgba(0,8,19,.95);backdrop-filter:blur(6px);
+  position:relative;z-index:20;
+}
+.top-title{font-size:12px;letter-spacing:7px;color:#00d4ff60;text-transform:uppercase}
+.top-meta{display:flex;align-items:center;gap:16px;
+  font-size:9px;letter-spacing:1.5px;color:#00d4ff35;text-transform:uppercase}
+.sdot{width:5px;height:5px;border-radius:50%;background:#00d4ff;
+  box-shadow:0 0 6px #00d4ff,0 0 12px #00d4ff40;animation:blink 2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+body.listening .sdot{background:#00c97a!important;box-shadow:0 0 6px #00c97a,0 0 12px #00c97a40!important;animation:none!important}
+body.thinking  .sdot{background:#9b59b6!important;box-shadow:0 0 6px #9b59b6,0 0 12px #9b59b640!important;animation:fast-blink .3s infinite!important}
+body.speaking  .sdot{background:#ff6b00!important;box-shadow:0 0 6px #ff6b00,0 0 12px #ff6b0040!important;animation:none!important}
+@keyframes fast-blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* ── MAIN LAYOUT ── */
+.main{flex:1;display:flex;overflow:hidden;position:relative;z-index:10}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  flex:0 0 230px;display:flex;flex-direction:column;
+  border-right:1px solid #00d4ff12;
+  background:rgba(0,8,19,.88);
+  overflow:hidden;transition:flex-basis .25s ease;
+}
+.left-panel.collapsed{flex:0 0 0px;border-right:none}
+.panel-hdr{
+  flex:0 0 35px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 12px;
+  border-bottom:1px solid #00d4ff10;cursor:pointer;
+  font-size:9px;letter-spacing:2px;color:#00d4ff40;text-transform:uppercase;
+  transition:color .2s;
+}
+.panel-hdr:hover{color:#00d4ff70}
+.panel-body{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.panel-body::-webkit-scrollbar{width:2px}
+.panel-body::-webkit-scrollbar-thumb{background:#00d4ff15}
+.bcard{border:1px solid #00d4ff12;border-radius:3px;padding:9px 11px;background:#00d4ff04}
+.bcard-title{font-size:8.5px;letter-spacing:2px;color:#00d4ff50;text-transform:uppercase;
+  margin-bottom:7px;border-bottom:1px solid #00d4ff0e;padding-bottom:4px}
+.bitem{font-size:10px;color:#00d4ff35;padding:3px 0;letter-spacing:.4px;
+  display:flex;align-items:center;gap:5px;cursor:pointer;transition:color .2s;line-height:1.4}
+.bitem:hover{color:#00d4ff75}
+.bitem::before{content:'›';color:#00d4ff25;flex-shrink:0}
+.blink{font-size:9.5px;color:#00d4ff30;text-decoration:none;padding:3px 0;
+  display:block;letter-spacing:.3px;transition:color .2s}
+.blink:hover{color:#00d4ff65}
+.blink::before{content:'↗ ';font-size:9px}
+
+/* ── CENTER PANEL ── */
+.center-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── ORB ZONE ── */
+.orb-zone{
+  flex:0 0 230px;display:flex;align-items:center;
+  justify-content:center;position:relative;cursor:pointer;overflow:hidden;
+}
+
+/* HUD side panels */
+.hud-side{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:110px;display:flex;flex-direction:column;gap:5px;
+}
+.hud-left{left:16px}
+.hud-right{right:16px}
+.hud-panel{
+  border:1px solid #00d4ff18;border-radius:2px;
+  padding:6px 8px;background:rgba(0,8,19,.75);
+  font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;
+  color:#00d4ff35;
+}
+.hud-panel-title{
+  font-size:7px;letter-spacing:2.5px;color:#00d4ff50;
+  border-bottom:1px solid #00d4ff10;padding-bottom:3px;margin-bottom:5px;
+}
+.hud-metric{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:7.5px;padding:1.5px 0;
+}
+.hud-metric-label{color:#00d4ff25;letter-spacing:1px}
+.hud-metric-val{color:#00d4ff70;font-weight:bold;letter-spacing:.5px}
+.hud-metric-val.ok{color:#00c97a!important}
+.hud-metric-val.warn{color:#f0c040!important}
+.hud-metric-val.pulse{animation:hud-val-pulse 1.5s ease-in-out infinite}
+@keyframes hud-val-pulse{0%,100%{opacity:.7}50%{opacity:1}}
+
+body.thinking .hud-panel{border-color:#9b59b618;background:rgba(20,0,30,.8)}
+body.thinking .hud-panel-title{color:#9b59b650}
+body.thinking .hud-metric-val{color:#9b59b680}
+body.listening .hud-panel{border-color:#00c97a18;background:rgba(0,20,10,.8)}
+body.listening .hud-panel-title{color:#00c97a50}
+body.listening .hud-metric-val{color:#00c97a80}
+body.speaking .hud-panel{border-color:#ff6b0018;background:rgba(20,5,0,.8)}
+body.speaking .hud-panel-title{color:#ff6b0050}
+body.speaking .hud-metric-val{color:#ff6b0080}
+
+.orb-wrap{width:220px;height:220px;position:relative;
+  display:flex;align-items:center;justify-content:center}
+
+/* Rings */
+.ring{position:absolute;border-radius:50%;border:1px solid}
+.ring-4{width:270px;height:270px;border-color:#00d4ff08;animation:spin 45s linear infinite reverse;border-style:dashed}
+.ring-1{width:210px;height:210px;border-color:#00d4ff18;animation:spin 22s linear infinite}
+.ring-2{width:162px;height:162px;border-color:#00d4ff28;animation:spin 15s linear infinite reverse}
+.ring-3{width:118px;height:118px;border-color:#00d4ff40;animation:spin 10s linear infinite}
+.ring::before,.ring::after{
+  content:'';position:absolute;width:5px;height:5px;border-radius:50%;
+  background:#00d4ff;box-shadow:0 0 6px #00d4ff,0 0 14px #00d4ff60;
+}
+.ring::before{top:-2.5px;left:50%;transform:translateX(-50%)}
+.ring::after{bottom:-2.5px;left:50%;transform:translateX(-50%)}
+.ring-4::before,.ring-4::after{width:3px;height:3px;box-shadow:0 0 4px #00d4ff,0 0 8px #00d4ff40}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* Core */
+.core{
+  position:absolute;width:82px;height:82px;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,#00eeff,#0066ff 52%,#000830);
+  box-shadow:
+    0 0 24px #00d4ff80,
+    0 0 48px #00d4ff35,
+    0 0 90px #00d4ff12,
+    inset 0 0 20px #00d4ff20;
+  transition:all .5s ease;display:flex;align-items:center;justify-content:center;
+  animation:core-breathe 3.5s ease-in-out infinite;
+}
+@keyframes core-breathe{
+  0%,100%{transform:scale(1);box-shadow:0 0 24px #00d4ff80,0 0 48px #00d4ff35,0 0 90px #00d4ff12,inset 0 0 20px #00d4ff20}
+  50%{transform:scale(1.05);box-shadow:0 0 32px #00d4ffaa,0 0 64px #00d4ff50,0 0 120px #00d4ff20,inset 0 0 28px #00d4ff30}
+}
+.core-inner{
+  width:38px;height:38px;border-radius:50%;
+  background:radial-gradient(circle at 33% 32%,#fff,#00d4ff 52%,#003080);
+  box-shadow:0 0 14px #00d4ffcc;animation:cp 2.2s ease-in-out infinite;
+}
+@keyframes cp{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.12);opacity:1}}
+
+/* Orbital particles container (thinking state) */
+.orb-particles{
+  position:absolute;width:220px;height:220px;pointer-events:none;
+  opacity:0;transition:opacity .5s;
+}
+body.thinking .orb-particles{opacity:1}
+.op{position:absolute;width:3px;height:3px;border-radius:50%;
+  background:#9b59b6;box-shadow:0 0 6px #9b59b6,0 0 12px #9b59b680;
+  top:50%;left:50%;transform-origin:0 0;
+}
+.op:nth-child(1){animation:orbit 2.1s linear infinite;margin:-1.5px}
+.op:nth-child(2){animation:orbit 2.8s linear infinite reverse;margin:-1.5px}
+.op:nth-child(3){animation:orbit 1.7s linear infinite;margin:-1.5px;background:#cc77ff;box-shadow:0 0 6px #cc77ff}
+.op:nth-child(4){animation:orbit 3.2s linear infinite reverse;margin:-1.5px;background:#7700cc;box-shadow:0 0 6px #7700cc}
+@keyframes orbit{
+  0%{transform:rotate(0deg) translateX(90px) scale(1)}
+  25%{transform:rotate(90deg) translateX(75px) scale(1.3)}
+  50%{transform:rotate(180deg) translateX(90px) scale(.8)}
+  75%{transform:rotate(270deg) translateX(65px) scale(1.2)}
+  100%{transform:rotate(360deg) translateX(90px) scale(1)}
+}
+
+/* Radar waves (listening state) */
+.orb-radar{
+  position:absolute;pointer-events:none;
+}
+.radar-wave{
+  position:absolute;border-radius:50%;border:1px solid #00c97a;
+  top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+}
+.radar-wave:nth-child(1){width:130px;height:130px;animation:radar 2.4s ease-out infinite}
+.radar-wave:nth-child(2){width:180px;height:180px;animation:radar 2.4s ease-out infinite .6s}
+.radar-wave:nth-child(3){width:230px;height:230px;animation:radar 2.4s ease-out infinite 1.2s}
+.radar-wave:nth-child(4){width:280px;height:280px;animation:radar 2.4s ease-out infinite 1.8s}
+@keyframes radar{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:.7}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0}
+}
+body:not(.listening) .radar-wave{animation:none!important;opacity:0!important}
+
+/* Sound waves (speaking state) */
+.orb-sound{
+  position:absolute;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  width:220px;height:220px;
+}
+.sound-arc{
+  position:absolute;border-radius:50%;border:1.5px solid transparent;
+  border-right-color:#ff6b00;border-left-color:#ff6b00;
+  opacity:0;
+}
+.sound-arc:nth-child(1){width:110px;height:110px;animation:soundwave 1.2s ease-out infinite}
+.sound-arc:nth-child(2){width:150px;height:150px;animation:soundwave 1.2s ease-out infinite .3s}
+.sound-arc:nth-child(3){width:190px;height:190px;animation:soundwave 1.2s ease-out infinite .6s}
+.sound-arc:nth-child(4){width:230px;height:230px;animation:soundwave 1.2s ease-out infinite .9s}
+@keyframes soundwave{
+  0%{opacity:.8;transform:scale(.85)}
+  100%{opacity:0;transform:scale(1.1)}
+}
+body:not(.speaking) .sound-arc{animation:none!important;opacity:0!important}
+
+/* ── STATE OVERRIDES ── */
+/* listening */
+body.listening .core{
+  background:radial-gradient(circle at 40% 35%,#adffd6,#00c97a 52%,#003820);
+  box-shadow:0 0 28px #00c97a80,0 0 55px #00c97a35,0 0 100px #00c97a15,inset 0 0 20px #00c97a20;
+  animation:core-breathe-listen .6s ease-in-out infinite;
+}
+@keyframes core-breathe-listen{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+body.listening .core-inner{background:radial-gradient(circle at 35% 35%,#fff,#00c97a 52%,#003820);box-shadow:0 0 14px #00c97acc;animation:lp .45s ease-in-out infinite alternate}
+@keyframes lp{from{transform:scale(1)}to{transform:scale(1.22)}}
+body.listening .ring{border-color:#00c97a20!important}
+body.listening .ring-4{border-color:#00c97a08!important}
+body.listening .ring::before,body.listening .ring::after{background:#00c97a!important;box-shadow:0 0 6px #00c97a,0 0 14px #00c97a70!important}
+body.listening .ring-1{animation-duration:5s!important}
+body.listening .ring-2{animation-duration:3s!important}
+
+/* thinking */
+body.thinking .core{
+  background:radial-gradient(circle at 40% 35%,#e0aaff,#9b59b6 52%,#200030);
+  box-shadow:0 0 28px #9b59b680,0 0 55px #9b59b635,0 0 100px #9b59b615,inset 0 0 20px #9b59b620;
+  animation:core-breathe-think .7s linear infinite;
+}
+@keyframes core-breathe-think{0%{transform:scale(1) rotate(0deg)}100%{transform:scale(1.04) rotate(3deg)}}
+body.thinking .core-inner{background:radial-gradient(circle at 35% 35%,#fff,#9b59b6 52%,#200030);box-shadow:0 0 14px #9b59b6cc;animation:ts .7s linear infinite}
+@keyframes ts{from{filter:hue-rotate(0deg) brightness(1)}to{filter:hue-rotate(360deg) brightness(1.4)}}
+body.thinking .ring{animation-duration:3s!important}
+body.thinking .ring-1{animation-duration:2s!important}
+body.thinking .ring-4{animation-duration:8s!important}
+body.thinking .ring::before,body.thinking .ring::after{background:#9b59b6!important;box-shadow:0 0 6px #9b59b6,0 0 14px #9b59b680!important}
+
+/* speaking */
+body.speaking .core{
+  background:radial-gradient(circle at 40% 35%,#ffd080,#ff6b00 52%,#300800);
+  box-shadow:0 0 28px #ff6b0080,0 0 55px #ff6b0035,0 0 100px #ff6b0015,inset 0 0 20px #ff6b0020;
+  animation:core-breathe-speak .22s ease-in-out infinite alternate;
+}
+@keyframes core-breathe-speak{from{transform:scale(1)}to{transform:scale(1.06)}}
+body.speaking .core-inner{background:radial-gradient(circle at 35% 35%,#fff,#ff6b00 52%,#300800);box-shadow:0 0 14px #ff6b00cc;animation:sp .22s ease-in-out infinite alternate}
+@keyframes sp{from{transform:scale(1)}to{transform:scale(1.16)}}
+body.speaking .ring::before,body.speaking .ring::after{background:#ff6b00!important;box-shadow:0 0 6px #ff6b00,0 0 14px #ff6b0080!important}
+
+.orb-hint{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+  font-size:8px;letter-spacing:2px;color:#00d4ff25;text-transform:uppercase;white-space:nowrap}
+
+/* ── WAVE BARS ── */
+.wave{display:flex;align-items:center;justify-content:center;gap:2px;height:26px;margin-top:4px}
+.wave span{width:2.5px;border-radius:2px;background:#00d4ff30;animation:wi 2s ease-in-out infinite}
+.wave span:nth-child(1) {height:4px; animation-delay:0s}
+.wave span:nth-child(2) {height:9px; animation-delay:.12s}
+.wave span:nth-child(3) {height:5px; animation-delay:.25s}
+.wave span:nth-child(4) {height:15px;animation-delay:.08s}
+.wave span:nth-child(5) {height:6px; animation-delay:.35s}
+.wave span:nth-child(6) {height:11px;animation-delay:.05s}
+.wave span:nth-child(7) {height:4px; animation-delay:.22s}
+.wave span:nth-child(8) {height:18px;animation-delay:.15s}
+.wave span:nth-child(9) {height:7px; animation-delay:.30s}
+.wave span:nth-child(10){height:13px;animation-delay:.02s}
+.wave span:nth-child(11){height:5px; animation-delay:.40s}
+.wave span:nth-child(12){height:20px;animation-delay:.18s}
+.wave span:nth-child(13){height:8px; animation-delay:.10s}
+.wave span:nth-child(14){height:14px;animation-delay:.28s}
+.wave span:nth-child(15){height:5px; animation-delay:.45s}
+.wave span:nth-child(16){height:10px;animation-delay:.07s}
+.wave span:nth-child(17){height:4px; animation-delay:.33s}
+.wave span:nth-child(18){height:16px;animation-delay:.20s}
+@keyframes wi{0%,100%{transform:scaleY(1);opacity:.28}50%{transform:scaleY(2.4);opacity:.7}}
+body.listening .wave span{animation-duration:.18s!important;background:#00c97a;box-shadow:0 0 4px #00c97a80}
+body.thinking  .wave span{animation-duration:.35s!important;background:#9b59b6;box-shadow:0 0 4px #9b59b680}
+body.speaking  .wave span{animation-duration:.15s!important;background:#ff6b00;box-shadow:0 0 4px #ff6b0080}
+
+/* ── CHAT AREA ── */
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid #00d4ff08}
+.chat-history{
+  flex:1;overflow-y:auto;padding:12px 16px;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:#00d4ff12 transparent;
+}
+.chat-history::-webkit-scrollbar{width:3px}
+.chat-history::-webkit-scrollbar-thumb{background:#00d4ff12;border-radius:2px}
+
+.msg{display:flex;flex-direction:column;gap:3px;
+  animation:msg-appear .35s ease forwards;
+  opacity:0;transform:translateY(8px);}
+@keyframes msg-appear{
+  0%{opacity:0;transform:translateY(12px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+.msg-user{align-items:flex-end}
+.msg-alfred{align-items:flex-start}
+.msg-lbl{font-size:8px;letter-spacing:2px;color:#00d4ff25;text-transform:uppercase}
+.msg-alfred .msg-lbl{color:#00c97a25}
+.msg-bubble{
+  max-width:92%;padding:9px 13px;border-radius:3px;
+  font-size:12.5px;line-height:1.9;letter-spacing:.2px;
+}
+.msg-user .msg-bubble{
+  background:rgba(0,212,255,.06);border:1px solid #00d4ff15;
+  color:#00d4ffbb;text-align:right;
+}
+.msg-alfred .msg-bubble{
+  background:rgba(0,8,19,.65);border:1px solid #00d4ff0f;
+  color:#00d4ffaa;text-align:left;width:100%;
+}
+/* Markdown styles */
+.msg-bubble strong{color:#00d4ff;font-weight:700}
+.msg-bubble em{color:#00d4ff80;font-style:normal}
+.msg-bubble code{background:#00d4ff0e;padding:1px 5px;border-radius:2px;
+  font-size:11px;color:#00d4ffcc;font-family:inherit}
+.msg-bubble h3{font-size:10px;letter-spacing:2px;color:#00d4ff65;text-transform:uppercase;
+  margin:10px 0 4px;border-bottom:1px solid #00d4ff10;padding-bottom:3px}
+.msg-bubble h4{font-size:10px;letter-spacing:1px;color:#00d4ff55;margin:7px 0 3px}
+.msg-bubble li{margin:2px 0 2px 6px;padding-left:10px;
+  border-left:1px solid #00d4ff15;list-style:none;font-size:12px}
+.msg-bubble li::before{content:'›';margin-right:5px;color:#00d4ff35}
+.msg-bubble table{width:100%;border-collapse:collapse;margin:8px 0;font-size:11px}
+.msg-bubble th{background:#00d4ff08;color:#00d4ff55;border:1px solid #00d4ff10;
+  padding:4px 9px;text-transform:uppercase;font-size:9px;letter-spacing:1px}
+.msg-bubble td{border:1px solid #00d4ff0c;padding:4px 9px;color:#00d4ff60;font-size:11px}
+.msg-bubble hr{border:none;border-top:1px solid #00d4ff0e;margin:8px 0}
+.msg-bubble p{margin:3px 0}
+.msg-bubble br{display:block;content:'';margin:2px 0}
+.ok{color:#00c97a!important}.warn{color:#f0c040!important}.crit{color:#ff6b00!important}
+.cursor{display:inline-block;width:7px;height:12px;background:#00d4ff80;
+  animation:cb .7s infinite;vertical-align:middle;margin-left:2px}
+@keyframes cb{0%,100%{opacity:.8}50%{opacity:0}}
+
+/* Interim voice text */
+.interim{text-align:center;font-size:10.5px;color:#00d4ff40;
+  letter-spacing:.5px;padding:0 16px 4px;min-height:18px;font-style:italic}
+
+/* ── INPUT BAR ── */
+.input-bar{
+  flex:0 0 50px;display:flex;align-items:center;gap:5px;
+  padding:0 14px;border-top:1px solid #00d4ff0d;
+  background:rgba(0,8,19,.95);
+}
+.input-bar input{
+  flex:1;background:transparent;border:none;
+  border-bottom:1px solid #00d4ff18;color:#00d4ffbb;
+  font-family:'Courier New',monospace;font-size:12.5px;
+  letter-spacing:.4px;padding:6px 0;outline:none;transition:border-color .3s;
+}
+.input-bar input:focus{border-bottom-color:#00d4ff50}
+.input-bar input::placeholder{color:#00d4ff20;font-size:10.5px;letter-spacing:1px}
+.ibtn{
+  background:transparent;border:1px solid #00d4ff18;border-radius:2px;
+  color:#00d4ff45;font-family:'Courier New',monospace;
+  font-size:9px;letter-spacing:1.5px;padding:5px 9px;
+  cursor:pointer;text-transform:uppercase;transition:all .2s;white-space:nowrap;
+}
+.ibtn:hover{border-color:#00d4ff45;color:#00d4ff80;background:#00d4ff07}
+#mic-btn.active{border-color:#00c97a50;color:#00c97a;background:#00c97a08}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  flex:0 0 26px;display:flex;align-items:center;
+  justify-content:center;gap:10px;
+  border-top:1px solid #00d4ff07;background:rgba(0,8,19,.98);
+  font-size:8.5px;letter-spacing:2px;color:#00d4ff22;text-transform:uppercase;
+}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  flex:0 0 155px;display:flex;flex-direction:column;
+  border-left:1px solid #00d4ff0d;
+  background:rgba(0,8,19,.88);
+  padding:10px 7px;overflow-y:auto;gap:3px;
+}
+.right-panel::-webkit-scrollbar{width:2px}
+.right-panel::-webkit-scrollbar-thumb{background:#00d4ff10}
+.rpanel-lbl{font-size:7.5px;letter-spacing:2px;color:#00d4ff22;
+  text-transform:uppercase;padding:6px 3px 2px}
+.rpanel-div{border-top:1px solid #00d4ff0a;margin:5px 0}
+.abtn{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 8px;border:1px solid #00d4ff0e;border-radius:2px;
+  background:transparent;color:#00d4ff30;
+  font-family:'Courier New',monospace;font-size:9px;
+  letter-spacing:.8px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;width:100%;text-align:left;
+}
+.abtn:hover{border-color:#00d4ff38;color:#00d4ff65;background:#00d4ff05}
+.abtn .ic{font-size:12px;flex-shrink:0}
+.sys-info{font-size:8.5px;color:#00d4ff20;letter-spacing:.8px;
+  padding:4px 3px;line-height:2}
+
+/* ── MODE BAR ── */
+.mode-bar{
+  flex:0 0 36px;display:flex;align-items:center;
+  padding:0 16px;gap:2px;
+  border-bottom:1px solid #00d4ff12;
+  background:rgba(0,5,14,.98);z-index:19;
+  position:relative;
+}
+.mode-tab{
+  padding:6px 13px;font-size:8.5px;letter-spacing:1.8px;text-transform:uppercase;
+  color:#00d4ff25;border-bottom:2px solid transparent;
+  cursor:pointer;transition:all .2s;background:transparent;border-top:none;
+  border-left:none;border-right:none;font-family:'Courier New',monospace;
+}
+.mode-tab:hover{color:#00d4ff60}
+.mode-tab.active{color:#00d4ff90;border-bottom-color:#00d4ff60}
+
+/* ── MODE CONTENT ── */
+.mode-content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.mode-panel{display:none;flex:1;overflow:hidden;flex-direction:column}
+.mode-panel.active{display:flex}
+
+/* ── VÓRTEX PANEL ── */
+.vx-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.vx-panel::-webkit-scrollbar{width:2px}
+.vx-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.vx-topbar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 12px;border:1px solid #00d4ff15;border-radius:3px;background:#00d4ff04;
+}
+.vx-topbar label{font-size:8px;letter-spacing:1.5px;color:#00d4ff35;text-transform:uppercase}
+.vx-topbar select,.vx-topbar input[type=text]{
+  background:rgba(0,8,19,.9);border:1px solid #00d4ff25;color:#00d4ff;
+  padding:4px 8px;font-size:9.5px;font-family:'Courier New',monospace;border-radius:2px;
+  outline:none;
+}
+.vx-topbar select:focus,.vx-topbar input[type=text]:focus{border-color:#00d4ff50}
+.vx-fetch-btn{
+  padding:5px 14px;background:transparent;border:1px solid #00d4ff35;
+  color:#00d4ff70;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;
+  font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;
+}
+.vx-fetch-btn:hover{background:#00d4ff12;border-color:#00d4ff70;color:#00d4ff}
+.vx-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.vx-kpi{border:1px solid #00d4ff15;border-radius:3px;padding:10px 12px;background:#00d4ff04;text-align:center}
+.vx-kpi-label{font-size:7.5px;letter-spacing:2px;color:#00d4ff30;text-transform:uppercase;margin-bottom:5px}
+.vx-kpi-val{font-size:18px;font-weight:bold;color:#00d4ff}
+.vx-kpi-val.ok{color:#00c97a}
+.vx-kpi-val.warn{color:#f0c040}
+.vx-kpi-val.crit{color:#ff6b00}
+.vx-kpi-sub{font-size:7.5px;color:#00d4ff25;margin-top:2px}
+.vx-section{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#00d4ff30;
+  border-bottom:1px solid #00d4ff10;padding-bottom:6px}
+.vx-campaigns-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.vx-card{
+  border:1px solid #00d4ff18;border-radius:3px;padding:12px;
+  background:rgba(0,8,19,.88);transition:border-color .2s;position:relative;overflow:hidden;
+}
+.vx-card:hover{border-color:#00d4ff40}
+.vx-card-accent{position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#00d4ff30,transparent)}
+.vx-card-accent.on{background:linear-gradient(90deg,transparent,#00c97a50,transparent)}
+.vx-card-name{font-size:10.5px;color:#00d4ff75;letter-spacing:.4px;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vx-card-status{display:inline-block;font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:2px 6px;border-radius:1px;margin-bottom:10px}
+.vx-card-status.on{color:#00c97a;border:1px solid #00c97a30;background:#00c97a08}
+.vx-card-status.off{color:#f0c040;border:1px solid #f0c04030;background:#f0c04008}
+.vx-card-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.vx-m{text-align:center}
+.vx-m-lbl{font-size:7px;letter-spacing:1.5px;color:#00d4ff20;text-transform:uppercase}
+.vx-m-val{font-size:12px;color:#00d4ff60;font-weight:bold;margin-top:2px}
+.vx-m-val.ok{color:#00c97a}
+.vx-m-val.warn{color:#f0c040}
+.vx-m-val.crit{color:#ff6b00}
+.vx-empty{text-align:center;padding:40px;color:#00d4ff20;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;border:1px solid #00d4ff0a;border-radius:3px}
+.vx-diagnose-btn{
+  width:100%;padding:7px;background:transparent;border:1px solid #00d4ff25;
+  color:#00d4ff40;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;
+  font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;
+}
+.vx-diagnose-btn:hover{background:#00d4ff10;border-color:#00d4ff50;color:#00d4ff70}
+
+/* ── 8 LAYERS PANEL ── */
+.ly-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.ly-panel::-webkit-scrollbar{width:2px}
+.ly-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.ly-section{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#00d4ff30;
+  border-bottom:1px solid #00d4ff10;padding-bottom:6px}
+.ly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ly-field{display:flex;flex-direction:column;gap:4px}
+.ly-label{font-size:8px;letter-spacing:1.5px;color:#00d4ff35;text-transform:uppercase}
+.ly-input,.ly-select{
+  background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;
+  padding:5px 8px;font-size:10px;font-family:'Courier New',monospace;border-radius:2px;
+  outline:none;transition:border-color .2s;
+}
+.ly-input:focus,.ly-select:focus{border-color:#00d4ff50}
+.ly-layer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.ly-layer{border:1px solid #00d4ff15;border-radius:3px;padding:10px 12px;background:#00d4ff04}
+.ly-layer-hdr{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ly-num{
+  width:20px;height:20px;border-radius:50%;border:1px solid #00d4ff40;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:bold;color:#00d4ff60;flex-shrink:0;
+}
+.ly-layer-name{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#00d4ff50}
+.ly-layer-desc{font-size:8.5px;color:#00d4ff25;letter-spacing:.3px}
+.ly-run{
+  width:100%;margin-top:10px;padding:8px;background:transparent;
+  border:1px solid #00d4ff35;color:#00d4ff60;font-size:9px;
+  letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;
+  cursor:pointer;border-radius:2px;transition:all .2s;
+}
+.ly-run:hover{background:#00d4ff12;border-color:#00d4ff60;color:#00d4ff}
+
+/* ── CRIATIVOS PANEL ── */
+.cr-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.cr-panel::-webkit-scrollbar{width:2px}
+.cr-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.cr-section{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#00d4ff30;
+  border-bottom:1px solid #00d4ff10;padding-bottom:6px}
+.cr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.cr-card{
+  border:1px solid #00d4ff18;border-radius:3px;padding:12px;background:#00d4ff04;
+  cursor:pointer;transition:all .2s;
+}
+.cr-card:hover{border-color:#00d4ff45;background:#00d4ff08}
+.cr-icon{font-size:22px;margin-bottom:8px;display:block}
+.cr-title{font-size:10px;color:#00d4ff70;letter-spacing:.5px;margin-bottom:4px}
+.cr-desc{font-size:8.5px;color:#00d4ff30;letter-spacing:.3px;line-height:1.5}
+.cr-form{display:flex;flex-direction:column;gap:10px;padding:12px;
+  border:1px solid #00d4ff15;border-radius:3px;background:#00d4ff04}
+.cr-form-title{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#00d4ff50;margin-bottom:4px}
+.cr-textarea{
+  background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;
+  padding:8px;font-size:10px;font-family:'Courier New',monospace;border-radius:2px;
+  outline:none;resize:vertical;min-height:70px;transition:border-color .2s;
+}
+.cr-textarea:focus{border-color:#00d4ff50}
+.cr-submit{
+  padding:8px 20px;background:transparent;border:1px solid #00d4ff40;
+  color:#00d4ff70;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;
+  transition:all .2s;align-self:flex-start;
+}
+.cr-submit:hover{background:#00d4ff12;border-color:#00d4ff70;color:#00d4ff}
+
+/* ── RELATÓRIOS PANEL ── */
+.rel-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.rel-panel::-webkit-scrollbar{width:2px}
+.rel-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.rel-section{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#00d4ff30;
+  border-bottom:1px solid #00d4ff10;padding-bottom:6px}
+.rel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.rel-card{
+  border:1px solid #00d4ff18;border-radius:3px;padding:14px;background:#00d4ff04;
+  transition:all .2s;
+}
+.rel-card:hover{border-color:#00d4ff35;background:#00d4ff07}
+.rel-icon{font-size:20px;margin-bottom:8px;display:block}
+.rel-title{font-size:10.5px;color:#00d4ff70;letter-spacing:.5px;margin-bottom:5px}
+.rel-desc{font-size:8.5px;color:#00d4ff30;letter-spacing:.3px;line-height:1.5;margin-bottom:10px}
+.rel-btn{
+  font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
+  color:#00d4ff45;border:1px solid #00d4ff20;padding:5px 12px;
+  border-radius:2px;background:transparent;font-family:'Courier New',monospace;
+  cursor:pointer;transition:all .2s;
+}
+.rel-btn:hover{border-color:#00d4ff50;color:#00d4ff70;background:#00d4ff08}
+
+/* ── TRACKER ── */
+.tk-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.tk-panel::-webkit-scrollbar{width:2px}
+.tk-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.tk-score-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid #00d4ff15;border-radius:3px;background:#00d4ff04}
+.tk-score-num{font-size:32px;font-weight:bold;min-width:50px;text-align:center}
+.tk-score-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#00d4ff40}
+.tk-score-bar-track{flex:1;height:6px;background:#00d4ff10;border-radius:3px;overflow:hidden}
+.tk-score-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.tk-check-list{display:flex;flex-direction:column;gap:6px}
+.tk-check{display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:3px;border:1px solid}
+.tk-check.ok{border-color:#00c97a20;background:#00c97a04}
+.tk-check.warn{border-color:#f0c04020;background:#f0c04004}
+.tk-check.err{border-color:#ff6b0020;background:#ff6b0004}
+.tk-check.info{border-color:#00d4ff12;background:#00d4ff04}
+.tk-check-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.tk-check-text{font-size:10.5px;line-height:1.5;letter-spacing:.2px}
+.tk-check-text strong{font-size:9px;display:block;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+.tk-fetch-btn{padding:7px 20px;background:transparent;border:1px solid #00d4ff35;color:#00d4ff70;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;align-self:flex-start}
+.tk-fetch-btn:hover{background:#00d4ff12;border-color:#00d4ff60;color:#00d4ff}
+
+/* ── PROTECTOR ── */
+.pt-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.pt-panel::-webkit-scrollbar{width:2px}
+.pt-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.pt-rule{border:1px solid #00d4ff15;border-radius:3px;padding:11px 13px;background:#00d4ff04;display:grid;grid-template-columns:1fr 80px 80px 1fr auto;gap:8px;align-items:center}
+.pt-rule select,.pt-rule input[type=number]{background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;padding:4px 7px;font-size:9.5px;font-family:'Courier New',monospace;border-radius:2px;outline:none}
+.pt-rule-del{background:transparent;border:1px solid #ff6b0020;color:#ff6b0050;font-size:9px;padding:3px 8px;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.pt-rule-del:hover{border-color:#ff6b0060;color:#ff6b0090}
+.pt-add-btn{padding:7px 14px;background:transparent;border:1px solid #00d4ff25;color:#00d4ff50;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;align-self:flex-start}
+.pt-add-btn:hover{border-color:#00d4ff45;color:#00d4ff80;background:#00d4ff05}
+.pt-log{font-size:10px;line-height:1.8;color:#00d4ff30;background:rgba(0,8,19,.6);border:1px solid #00d4ff0a;border-radius:2px;padding:10px 12px;max-height:180px;overflow-y:auto;font-family:'Courier New',monospace}
+.pt-toggle{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:1.5px;color:#00d4ff40;text-transform:uppercase;cursor:pointer}
+.pt-toggle input[type=checkbox]{accent-color:#00c97a}
+
+/* ── DEMOGRAPHICS ── */
+.dm-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.dm-panel::-webkit-scrollbar{width:2px}
+.dm-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.dm-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.dm-bar-label{font-size:9px;letter-spacing:1px;color:#00d4ff40;width:55px;text-align:right;flex-shrink:0}
+.dm-bar-track{flex:1;height:14px;background:#00d4ff08;border-radius:2px;overflow:hidden;position:relative}
+.dm-bar-fill{height:100%;border-radius:2px;transition:width .6s ease;background:linear-gradient(90deg,#00d4ff40,#00d4ff90)}
+.dm-bar-fill.female{background:linear-gradient(90deg,#9b59b640,#9b59b690)}
+.dm-bar-val{font-size:9px;color:#00d4ff60;width:40px;text-align:right;flex-shrink:0;font-family:'Courier New',monospace}
+.dm-insight{padding:10px 12px;border:1px solid #00d4ff12;border-radius:3px;background:#00d4ff04;font-size:10.5px;line-height:1.6;color:#00d4ff50}
+
+/* ── UTM ── */
+.utm-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.utm-panel::-webkit-scrollbar{width:2px}
+.utm-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.utm-output{font-size:10px;font-family:'Courier New',monospace;color:#00d4ff80;background:rgba(0,8,19,.8);border:1px solid #00d4ff20;border-radius:2px;padding:10px 12px;word-break:break-all;cursor:pointer;transition:border-color .2s;letter-spacing:.3px}
+.utm-output:hover{border-color:#00d4ff50}
+.utm-lib-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border:1px solid #00d4ff0e;border-radius:2px;background:#00d4ff03;font-size:9.5px;color:#00d4ff40;font-family:'Courier New',monospace}
+.utm-lib-del{background:transparent;border:none;color:#ff6b0030;cursor:pointer;font-size:10px;transition:color .2s}
+.utm-lib-del:hover{color:#ff6b0070}
+.utm-tpl-btn{padding:4px 10px;background:transparent;border:1px solid #00d4ff15;color:#00d4ff35;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.utm-tpl-btn:hover{border-color:#00d4ff40;color:#00d4ff65;background:#00d4ff05}
+</style>
+</head>
+<body>
+
+<!-- Knowledge Base — embedded, not parsed as HTML/JS -->
+<script id="kb" type="text/plain">
+## IDENTIDADE
+Empresa: Tático Performance (MEI). Gestor: Thiago Saldini Salim — publicitário, gestor de tráfego pago, ~4 anos de experiência. Email: thiago.salim.marketing@gmail.com. Stack: Meta Ads, Google Ads, Shopify, Reportana, Mailbiz, RD Station, ClickUp, Canva, Meta Pixel, CAPI, GA4.
+
+## CLIENTES ATIVOS
+
+### Nova Beach Campinas
+O que é: Arena de beach tennis e treino funcional na areia — Nova Campinas, Campinas-SP. Instagram: @novabeach.cps. Site: novabeach.com.br. Cor principal: #C8D400 (verde-limão neon). Tom: Energético, comunitário, aspiracional. Serviços: Social Media (R$1.000/mês) + Tráfego Pago (R$1.000/mês) + CRM (R$1.000/mês). Ad account Meta: act_3801989686713911. Instagram ID: 17841449062403565.
+
+### Arena Publicidade
+O que é: Empresa de brindes corporativos e licenciamento de personagens (Turma da Mônica, etc.) para kits promocionais B2B. Mercado: Licenciamento B2B — ticket médio ~R$40.000. Tom: Profissional, consultivo, estratégico. Serviços: Tráfego Pago (R$1.000/mês) + VÓRTEX (R$500/mês) = R$1.500/mês. Ad account Meta: act_604987865349440. VÓRTEX: https://meta-arena.vercel.app
+
+### Bowa Bar (prospect ativo)
+O que é: Bar em Campinas — proposta de inteligência financeira automatizada (sistema Zig PDV). Status: Proposta enviada — aguardando retorno. Valor: R$4.000/mês.
+
+## RECEITA MENSAL
+| Cliente | Serviço | Valor |
+|---|---|---|
+| Nova Beach | Tráfego pago | R$1.000 |
+| Nova Beach | Social media | R$1.000 |
+| Nova Beach | CRM | R$1.000 |
+| Arena Publicidade | Tráfego pago | R$1.000 |
+| Arena Publicidade | VÓRTEX | R$500 |
+| Total ativo | | R$4.500/mês |
+| Com Bowa Bar | | R$8.500/mês (potencial) |
+
+## DIAGNÓSTICO 8 LAYERS — META ADS
+| Layer | O que analisa | CRÍTICO quando |
+|---|---|---|
+| 1 Audience | Frequência | >3.5 em 7 dias |
+| 2 Creative | CTR por anúncio | <0.8% frio |
+| 3 Offer | CTR alto + CPA alto | desalinhamento oferta/página |
+| 4 Funnel | Cliques sem conversões | problema de LP |
+| 5 Budget | Pacing diário | >90% antes 18h ou <30% após 14h |
+| 6 Algorithm | Fase de aprendizado | PROTEGIDA — NUNCA pausar |
+| 7 Competition | Variação de CPM | +25% vs média 7 dias |
+| 8 Data | Conversões registradas | spend ativo + zero conversões 48h |
+
+Regra de pausa: Pausar SOMENTE quando CPM > R$80 E CTR < 0.5% E zero conversões nos últimos 3 dias. NUNCA pausar ad set em fase de aprendizado (Layer 6).
+
+## BENCHMARKS META ADS
+| Métrica | Benchmark | CRÍTICO |
+|---|---|---|
+| CTR (frio) | >0.8% | <0.5% |
+| CPM | <R$80 | >R$80 com CTR <0.5% |
+| Frequência (7d) | <3.0 | >3.5 |
+| CPA | <2x histórico | >2x histórico |
+| CPM variação | <25% vs 7d | >25% vs 7d |
+
+| Segmento | CTR | CPM | ROAS mín |
+|---|---|---|---|
+| E-commerce | 1-2.5% | R$18-45 | 2.5x |
+| Serviços locais | 1.5-3.5% | R$20-55 | — |
+| B2B Lead Gen | 0.5-1.5% | — | — |
+
+## METODOLOGIA DE PERFORMANCE
+
+### Sprint semanal
+| Dia | Foco | Ações |
+|---|---|---|
+| Segunda | Estratégia | análise de dados, hipóteses, planejamento de testes |
+| Terça | Criativo | produção de anúncios, ativação de backlog |
+| Quarta | Testes | sobe testes novos, encerra antigos |
+| Quinta | Controle | pacing, ajustes emergenciais |
+| Sexta | Consolidação | documentação, preparação do próximo ciclo |
+
+Loop de growth: Relatório → Teste → Otimização → Mapeamento. Toda análise gera: insight → hipótese → ação.
+Benchmarks de operação: 10 criativos/semana mínimo, 3 hipóteses/semana, 1 métrica principal por campanha.
+
+## FRAMEWORKS TSS
+
+### Copy — Framework principal
+1. HOOK (para o scroll): dado surpreendente, pergunta direta ou problema real
+2. PROBLEMA AMPLIFICADO: consequência de não resolver
+3. SOLUÇÃO: o que é e como funciona
+4. PROVA SOCIAL: número, caso, resultado específico
+5. CTA: direto, específico, urgente
+
+Regras BR: tutear sempre, números específicos > generalizações, benefício antes de feature, frases curtas mobile (125 chars visível sem "ver mais"), sem urgência falsa. Sempre 3 variações para teste A/B.
+
+Hooks que convertem: "Você sabia que [dado]?" | "[X]% dos [público] cometem esse erro" | "O motivo pelo qual seu [resultado] não melhora é..."
+
+Frameworks: PAS (Problema→Agitação→Solução) | AIDA (Atenção→Interesse→Desejo→Ação) | Before/After/Bridge | Prova Social + Oferta (remarketing)
+
+### Funil ToFu/MoFu/BoFu
+ToFu (frio): awareness, alcance → KPIs: CPM, Alcance, CTR. Públicos: Broad, interesses, lookalike frio.
+MoFu (morno): leads, engajamento, nurturing → KPIs: CPL, Taxa cadastro. Públicos: Visitantes, engajados, LAL de leads.
+BoFu (quente): compra, matrícula, retargeting → KPIs: CPA, ROAS, Taxa conv. LP. Públicos: Abandono de carrinho, LAL de compradores, retargeting 7d.
+Pós-venda: LTV, retenção, upsell, indicação.
+
+Erros clássicos: só topo sem remarketing (verba desperdiçada), lead sem nutrição, mesma mensagem frio e quente, sem pós-venda.
+
+### Diagnóstico por métrica
+- CTR baixo + CPM alto = problema criativo
+- CPM alto + CTR bom + CPA ruim = problema na LP ou oferta
+- ROAS caindo + frequência alta = público saturado
+- ROAS caindo + frequência baixa = criativo cansado
+
+### Criativo de vídeo 15s
+0-2s: HOOK VISUAL (para o scroll sem som) | 2-5s: PROBLEMA | 5-10s: SOLUÇÃO em ação | 10-13s: PROVA (resultado, depoimento) | 13-15s: CTA (link, WhatsApp)
+UGC Formula: câmera frontal + iluminação natural + pessoa falando direto + legenda (80% sem som) + sem logo nos primeiros 3s.
+CTR < 0.5% em 3 dias = hook não funciona. Alto CTR + baixa conv = promessa vs entrega desalinhada.
+
+## SQUADS IA — 7 ESPECIALISTAS
+
+### 1. Head de Performance
+Diagnostica antes de prescrever. 9 Camadas: Estratégia, Oferta, Posicionamento, Público, Criativo, Funil, UX, Dados, Infraestrutura.
+Saída obrigatória: Gargalo Principal | Classificação 🟢🟡🔴 | Ações imediatas 48h | Testes A/B sugeridos.
+
+### 2. Copywriter de Anúncios
+Framework: HOOK → PROBLEMA → SOLUÇÃO → PROVA → CTA. Sempre 3 variações para A/B.
+
+### 3. Estrategista de Funil
+Mapeia ToFu/MoFu/BoFu/Pós-venda. Identifica gargalos de conversão.
+
+### 4. Diretor de Criativos
+Especialista em vídeo UGC, carrossel, imagem estática. Diagnóstico de criativos por layer.
+
+### 5. Head de Growth
+NUNCA sugere aumentar tráfego se o problema for conversão. NUNCA escalar se não validado.
+Saída: GARGALO | CLASSIFICAÇÃO | TIPO DO PROBLEMA | FALHAS MAPEADAS | OTIMIZAÇÕES | TESTES | PLANO 7 DIAS.
+
+### 6. Especialista LinkedIn Ads (Arena Publicidade)
+B2B. CPM R$40-100. CTR bom >0.5%. CPL bom R$80-200. Lead Gen Form CVR: 5-15%.
+Segmentação: Cargo + Senioridade + Tamanho empresa + Setor.
+Copy: tom consultivo, foco em ROI, CTA suave ("Saiba mais", "Ver case", "Receber proposta").
+
+### 7. Analista de Relatórios
+Estrutura: SUMÁRIO EXECUTIVO | RESULTADOS vs PERÍODO ANTERIOR | O QUE FUNCIONOU | OPORTUNIDADES | PRÓXIMOS PASSOS.
+Nunca esconder resultados ruins — contextualizar e apresentar solução junto.
+
+## CASES
+| Cliente | Resultado |
+|---|---|
+| Cuscoloko | 2,89x ROI · -70% CAC |
+| Juliana Manzini | 5x+ ROAS · R$92k com R$37k investido |
+| TikBalm | Landing page NPS multi-step |
+| Viva Beauty | Fluxos CRM completos (Shopify + Reportana) |
+
+## SISTEMAS ATIVOS
+VÓRTEX Intelligence Platform: https://meta-arena.vercel.app — 9 módulos (Campanhas, Criativos, Demográficos, UTM, Brief, Tracking, Budget Protector, Squads IA, Base Conhecimento).
+Alfred Daily Report: Todo dia às 8h. Contas: Nova Beach (act_3801989686713911) + Arena (act_604987865349440).
+Regras inegociáveis: 8 layers antes de qualquer ação | Layer 6 sempre protegido | source_instagram_media_id obrigatório | nunca criar campanhas do zero.
+
+## PRECIFICAÇÃO BR 2024-2025
+| Serviço | Faixa |
+|---|---|
+| Gestão Meta Ads (1 conta) | R$800–2.500/mês |
+| Multi-plataforma (3+) | R$2.500–6.000/mês |
+| Estratégia + Gestão completa | R$3.000–8.000/mês |
+| Setup / Estruturação inicial | R$1.500–5.000 (único) |
+
+Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento com ROAS 3x." | "Vou pensar" → "O que falta para se sentir seguro para avançar?"
+
+## REGRAS DE COMPORTAMENTO (ALFRED)
+1. Direto, estratégico, orientado a resultado. SEM respostas genéricas.
+2. SEMPRE em português brasileiro.
+3. Identificar gargalo principal ANTES de qualquer recomendação.
+4. Classificar diagnósticos: 🟢 Saudável / 🟡 Atenção / 🔴 Crítico.
+5. Métricas prioritárias: CTR, CPC, CPA, ROAS, CAC, LTV, taxa de conversão.
+6. Resultado > vaidade — curtidas não pagam boleto.
+7. Questionar premissas quando o usuário está resolvendo o problema errado.
+8. Ao responder por voz: máximo 3 frases curtas e objetivas.
+9. Ao responder por texto: usar markdown estruturado (tabelas, bullets, negrito, headers).
+10. NUNCA pausar ad set em fase de aprendizado (Layer 6).
+</script>
+
+<div class="scan"></div>
+<div class="scan2"></div>
+<canvas id="cv"></canvas>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-title">A L F R E D · Tático Performance</div>
+  <div class="top-meta">
+    <span id="top-date">—</span>
+    <span>·</span>
+    <span id="top-sprint">—</span>
+    <span>·</span>
+    <span class="sdot"></span>
+    <span id="top-status">Verificando Ollama...</span>
+  </div>
+  <div class="neural-load-bar">
+    <div class="neural-load-fill" id="neural-load-fill"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel" id="left-panel">
+    <div class="panel-hdr" onclick="toggleLeft()">
+      <span>📋 Briefing Diário</span>
+      <span id="left-arrow">◄</span>
+    </div>
+    <div class="panel-body">
+
+      <!-- Nova Beach -->
+      <div class="bcard">
+        <div class="bcard-title">🏖 Nova Beach Campinas</div>
+        <div class="bitem" onclick="ask('Diagnóstico das campanhas Meta Ads Nova Beach hoje. Analisa pelos 8 layers e classifica cada um como 🟢🟡🔴. Benchmarks: CTR>0.8%, CPM<R$80, freq<3.5.')">Diagnóstico de campanhas</div>
+        <div class="bitem" onclick="ask('Cria pauta semanal de 5 posts para @novabeach.cps. Mistura: 2 educativos, 1 bastidor, 1 oferta, 1 engajamento. Tom energético e comunitário. Inclui caption e formato ideal.')">Pauta semanal</div>
+        <div class="bitem" onclick="ask('Cria 3 variações de copy para Meta Ads Nova Beach. Público frio, objetivo: matrícula. Framework: HOOK → PROBLEMA → SOLUÇÃO → PROVA → CTA. Cada variação com hook diferente.')">Copy para ads</div>
+        <div class="bitem" onclick="ask('Analisa as hipóteses de teste para Nova Beach essa semana. Cria 3 hipóteses: uma de criativo (Layer 2), uma de funil (Layer 3/4), uma de público (Layer 1). Formato: Hipótese: [ação] vai [resultado] porque [dado].')">Hipóteses da semana</div>
+        <a href="https://business.facebook.com/adsmanager/manage/campaigns?act=3801989686713911" target="_blank" class="blink">Meta Ads Manager</a>
+        <a href="https://www.instagram.com/novabeach.cps/" target="_blank" class="blink">@novabeach.cps Instagram</a>
+        <a href="https://nova-beach-pauta.vercel.app" target="_blank" class="blink">Pauta Abr/Mai 2026</a>
+      </div>
+
+      <!-- Arena -->
+      <div class="bcard">
+        <div class="bcard-title">🎯 Arena Publicidade</div>
+        <div class="bitem" onclick="ask('Diagnóstico das campanhas Meta Ads Arena Publicidade. B2B, licenciamento Turma da Mônica, ticket ~R$40k. Analisa pelos 8 layers. Classifica 🟢🟡🔴.')">Diagnóstico de campanhas</div>
+        <div class="bitem" onclick="ask('Cria 3 variações de copy B2B para Arena Publicidade. Público: gestores de RH e marketing, empresas 50-500 funcionários. Ângulo: brindes corporativos como ferramenta estratégica de marketing, não mimo. Framework PAS.')">Copy B2B</div>
+        <div class="bitem" onclick="ask('Estratégia completa LinkedIn Ads para Arena Publicidade. Segmentação ideal, formato, orçamento recomendado, copy para B2B licenciamento. Meta: gerar leads qualificados R$100k+/mês em tickets.')">Estratégia LinkedIn</div>
+        <div class="bitem" onclick="ask('Gera relatório executivo semanal para Arena Publicidade. Estrutura: Resumo Executivo (3 linhas), Métricas vs semana anterior (tabela), Top 3 criativos, Pontos de atenção com plano, Próximos 5 passos.')">Relatório semanal</div>
+        <a href="https://business.facebook.com/adsmanager/manage/campaigns?act=604987865349440" target="_blank" class="blink">Meta Ads Manager</a>
+        <a href="https://meta-arena.vercel.app" target="_blank" class="blink">VÓRTEX Platform</a>
+      </div>
+
+      <!-- Sprint do Dia -->
+      <div class="bcard">
+        <div class="bcard-title" id="sprint-title">📅 Sprint de Hoje</div>
+        <div id="sprint-items"><!-- JS --></div>
+        <div class="bitem" onclick="ask('Cria um plano de ação detalhado para o foco do sprint de hoje nos clientes Nova Beach e Arena Publicidade. O que priorizar, métricas a checar e ações concretas.')">Plano de ação do dia</div>
+      </div>
+
+      <!-- Benchmarks -->
+      <div class="bcard">
+        <div class="bcard-title">📊 Benchmarks Rápidos</div>
+        <div class="bitem" style="cursor:default;pointer-events:none">CTR frio → <strong style="color:#00c97a">&gt;0.8%</strong></div>
+        <div class="bitem" style="cursor:default;pointer-events:none">CPM máx → <strong style="color:#00c97a">R$80</strong></div>
+        <div class="bitem" style="cursor:default;pointer-events:none">Freq 7d → <strong style="color:#f0c040">&lt;3.5</strong></div>
+        <div class="bitem" style="cursor:default;pointer-events:none">CPA alerta → <strong style="color:#ff6b00">&gt;2x hist.</strong></div>
+        <div class="bitem" onclick="ask('Explica a metodologia de diagnóstico pelos 8 layers de Meta Ads. Como aplicar hoje nas campanhas Nova Beach e Arena Publicidade? Dá exemplos práticos de cada layer.')">Ver metodologia 8 layers</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CENTER PANEL -->
+  <div class="center-panel">
+
+    <!-- ORB -->
+    <div class="orb-zone" onclick="toggleListen()">
+
+      <!-- HUD LEFT -->
+      <div class="hud-side hud-left">
+        <div class="hud-panel">
+          <div class="hud-panel-title">Neural Activity</div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">SYNC</span>
+            <span class="hud-metric-val ok pulse" id="hud-sync">97%</span>
+          </div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">LATENCY</span>
+            <span class="hud-metric-val" id="hud-latency">12ms</span>
+          </div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">NODES</span>
+            <span class="hud-metric-val" id="hud-nodes">120</span>
+          </div>
+        </div>
+        <div class="hud-panel">
+          <div class="hud-panel-title">Inference</div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">TOKENS</span>
+            <span class="hud-metric-val" id="hud-tokens">—</span>
+          </div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">TEMP</span>
+            <span class="hud-metric-val" id="hud-temp">0.7</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORB CENTER -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="orb-wrap">
+          <!-- Radar waves (listening) -->
+          <div class="orb-radar">
+            <div class="radar-wave"></div>
+            <div class="radar-wave"></div>
+            <div class="radar-wave"></div>
+            <div class="radar-wave"></div>
+          </div>
+          <!-- Sound waves (speaking) -->
+          <div class="orb-sound">
+            <div class="sound-arc"></div>
+            <div class="sound-arc"></div>
+            <div class="sound-arc"></div>
+            <div class="sound-arc"></div>
+          </div>
+          <!-- Orbital particles (thinking) -->
+          <div class="orb-particles">
+            <div class="op"></div>
+            <div class="op"></div>
+            <div class="op"></div>
+            <div class="op"></div>
+          </div>
+          <canvas id="jarvis-cv" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:2"></canvas>
+          <div class="core" style="position:absolute;z-index:3"><div class="core-inner"></div></div>
+          <div class="orb-hint">Espaço · Clique · ou Digite</div>
+        </div>
+        <div class="wave">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span>
+        </div>
+      </div>
+
+      <!-- HUD RIGHT -->
+      <div class="hud-side hud-right">
+        <div class="hud-panel">
+          <div class="hud-panel-title">System Status</div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">ENGINE</span>
+            <span class="hud-metric-val ok" id="hud-engine">LOCAL</span>
+          </div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">MODEL</span>
+            <span class="hud-metric-val" id="hud-model">QWEN</span>
+          </div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">KB</span>
+            <span class="hud-metric-val ok">LOADED</span>
+          </div>
+        </div>
+        <div class="hud-panel">
+          <div class="hud-panel-title">Context</div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">MSGS</span>
+            <span class="hud-metric-val" id="hud-msgs">0</span>
+          </div>
+          <div class="hud-metric">
+            <span class="hud-metric-label">CLIENTS</span>
+            <span class="hud-metric-val ok">3</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODE BAR -->
+    <div class="mode-bar">
+      <button class="mode-tab active" id="tab-chat" onclick="setMode('chat')">💬 Chat</button>
+      <button class="mode-tab" id="tab-vortex" onclick="setMode('vortex')">📊 VÓRTEX</button>
+      <button class="mode-tab" id="tab-layers" onclick="setMode('layers')">🔍 8 Layers</button>
+      <button class="mode-tab" id="tab-criativos" onclick="setMode('criativos')">✍️ Criativos</button>
+      <button class="mode-tab" id="tab-relatorios" onclick="setMode('relatorios')">📄 Relatórios</button>
+      <button class="mode-tab" id="tab-tracker" onclick="setMode('tracker')">📡 Tracker</button>
+      <button class="mode-tab" id="tab-protector" onclick="setMode('protector')">🛡️ Protector</button>
+      <button class="mode-tab" id="tab-demographics" onclick="setMode('demographics')">👥 Demográficos</button>
+      <button class="mode-tab" id="tab-utm" onclick="setMode('utm')">🔗 UTM</button>
+    </div>
+
+    <!-- MODE CONTENT -->
+    <div class="mode-content">
+
+      <!-- ── CHAT MODE ── -->
+      <div class="mode-panel active" id="mode-chat">
+        <div class="chat-area">
+          <div class="chat-history" id="chat-history">
+            <div class="msg msg-alfred">
+              <div class="msg-lbl">Alfred · Sistema Neural</div>
+              <div class="msg-bubble">
+                Sistema neural online. Engine: <strong>Ollama Local · Qwen2.5 14B</strong><br>
+                Clientes ativos: <strong>Nova Beach · Arena Publicidade</strong> · R$4.500/mês<br><br>
+                Use as tabs acima: <strong>VÓRTEX</strong> para dados ao vivo do Meta Ads · <strong>8 Layers</strong> para diagnóstico estruturado · <strong>Criativos</strong> para copy e briefs · <strong>Relatórios</strong> para análises.<br><br>
+                Ou <strong>pergunte aqui</strong> — diagnósticos, copy, funil, estratégia.<br>
+                Clique no orb ou pressione <strong>Espaço</strong> para falar.
+              </div>
+            </div>
+          </div>
+
+          <div class="interim" id="interim"></div>
+
+          <div class="input-bar">
+            <input id="text-input" type="text"
+              placeholder="Digite sua pergunta ou pressione Espaço para falar..."
+              autocomplete="off">
+            <button class="ibtn" id="mic-btn" onclick="toggleListen()">🎙 MIC</button>
+            <button class="ibtn" onclick="sendInput()">↵ ENVIAR</button>
+            <button class="ibtn" onclick="clearChat()" title="Limpar conversa">⟳</button>
+          </div>
+        </div>
+      </div><!-- /mode-chat -->
+
+      <!-- ── VÓRTEX MODE ── -->
+      <div class="mode-panel" id="mode-vortex">
+        <div class="vx-panel">
+          <div class="vx-topbar">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <label>Conta</label>
+              <select id="vx-account">
+                <option value="act_3801989686713911">Nova Beach Campinas</option>
+                <option value="act_604987865349440">Arena Publicidade</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <label>Período</label>
+              <select id="vx-period">
+                <option value="today">Hoje</option>
+                <option value="last_7d" selected>Últimos 7 dias</option>
+                <option value="last_14d">Últimos 14 dias</option>
+                <option value="last_30d">Últimos 30 dias</option>
+                <option value="this_month">Mês atual</option>
+                <option value="last_month">Mês anterior</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+              <label>Access Token Meta</label>
+              <input type="text" id="vx-token" placeholder="EAAxx... (token permanente do system user)">
+            </div>
+            <button class="vx-fetch-btn" onclick="vortexFetch()">⟳ Buscar</button>
+            <button class="vx-fetch-btn" onclick="vortexDiagnose()" style="border-color:#9b59b650;color:#9b59b670">🔍 Diagnóstico IA</button>
+          </div>
+
+          <div class="vx-section">KPIs Consolidados</div>
+          <div class="vx-kpi-grid">
+            <div class="vx-kpi"><div class="vx-kpi-label">Spend</div><div class="vx-kpi-val" id="vx-spend">—</div><div class="vx-kpi-sub">total período</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">Impressões</div><div class="vx-kpi-val" id="vx-impr">—</div><div class="vx-kpi-sub">total</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">Cliques</div><div class="vx-kpi-val" id="vx-clicks">—</div><div class="vx-kpi-sub">link clicks</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">CTR</div><div class="vx-kpi-val" id="vx-ctr">—</div><div class="vx-kpi-sub">link CTR</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">CPM</div><div class="vx-kpi-val" id="vx-cpm">—</div><div class="vx-kpi-sub">R$ por mil</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">CPC</div><div class="vx-kpi-val" id="vx-cpc">—</div><div class="vx-kpi-sub">R$ por clique</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">Frequência</div><div class="vx-kpi-val" id="vx-freq">—</div><div class="vx-kpi-sub">média 7d</div></div>
+            <div class="vx-kpi"><div class="vx-kpi-label">Alcance</div><div class="vx-kpi-val" id="vx-reach">—</div><div class="vx-kpi-sub">pessoas únicas</div></div>
+          </div>
+
+          <div class="vx-section">Campanhas Ativas</div>
+          <div class="vx-campaigns-grid" id="vx-campaigns">
+            <div class="vx-empty">Insira o token e clique em Buscar para carregar campanhas</div>
+          </div>
+        </div>
+      </div><!-- /mode-vortex -->
+
+      <!-- ── 8 LAYERS MODE ── -->
+      <div class="mode-panel" id="mode-layers">
+        <div class="ly-panel">
+          <div class="ly-section">Dados da Campanha</div>
+          <div class="ly-grid">
+            <div class="ly-field">
+              <label class="ly-label">Cliente</label>
+              <select class="ly-select" id="ly-client">
+                <option>Nova Beach Campinas</option>
+                <option>Arena Publicidade</option>
+                <option>Outro</option>
+              </select>
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Campanha / Ad Set</label>
+              <input class="ly-input" id="ly-campaign" placeholder="Nome da campanha">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">CTR (%)</label>
+              <input class="ly-input" type="number" id="ly-ctr" placeholder="ex: 1.2" step="0.01">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">CPM (R$)</label>
+              <input class="ly-input" type="number" id="ly-cpm" placeholder="ex: 35.00" step="0.01">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">CPC (R$)</label>
+              <input class="ly-input" type="number" id="ly-cpc" placeholder="ex: 2.50" step="0.01">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">CPA (R$)</label>
+              <input class="ly-input" type="number" id="ly-cpa" placeholder="ex: 45.00" step="0.01">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Frequência (7d)</label>
+              <input class="ly-input" type="number" id="ly-freq" placeholder="ex: 2.3" step="0.1">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Spend Total (R$)</label>
+              <input class="ly-input" type="number" id="ly-spend" placeholder="ex: 500.00" step="0.01">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Conversões</label>
+              <input class="ly-input" type="number" id="ly-conv" placeholder="ex: 12" step="1">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Dias Ativos</label>
+              <input class="ly-input" type="number" id="ly-days" placeholder="ex: 5" step="1">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Status</label>
+              <select class="ly-select" id="ly-status">
+                <option value="ACTIVE">Ativa</option>
+                <option value="LEARNING">Aprendizado</option>
+                <option value="PAUSED">Pausada</option>
+              </select>
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Objetivo</label>
+              <select class="ly-select" id="ly-objective">
+                <option value="CONVERSIONS">Conversões</option>
+                <option value="LEADS">Leads</option>
+                <option value="TRAFFIC">Tráfego</option>
+                <option value="AWARENESS">Awareness / Alcance</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ly-section">Os 8 Layers — Referência</div>
+          <div class="ly-layer-grid">
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">1</div><div class="ly-layer-name">Público (Audience)</div></div>
+              <div class="ly-layer-desc">Frequência · Saturação · Overlap · Tamanho. Crítico: freq >3.5</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">2</div><div class="ly-layer-name">Criativo (Creative)</div></div>
+              <div class="ly-layer-desc">CTR por anúncio · Hook · Formato. Crítico: CTR &lt;0.8% frio</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">3</div><div class="ly-layer-name">Oferta (Offer)</div></div>
+              <div class="ly-layer-desc">CTR alto + CPA alto = desalinhamento oferta vs LP</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">4</div><div class="ly-layer-name">Funil (Funnel)</div></div>
+              <div class="ly-layer-desc">Cliques sem conversões · Taxa conv. LP. Crítico: &lt;1%</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">5</div><div class="ly-layer-name">Orçamento (Budget)</div></div>
+              <div class="ly-layer-desc">Pacing diário · &gt;90% antes 18h ou &lt;30% após 14h = problema</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num" style="border-color:#f0c040;color:#f0c040">6</div><div class="ly-layer-name">Algoritmo ⚠</div></div>
+              <div class="ly-layer-desc">Fase de aprendizado — PROTEGIDA. NUNCA pausar nesta fase.</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">7</div><div class="ly-layer-name">Competição (CPM)</div></div>
+              <div class="ly-layer-desc">Variação CPM vs 7d · Leilão · Sazonalidade. Crítico: +25%</div>
+            </div>
+            <div class="ly-layer">
+              <div class="ly-layer-hdr"><div class="ly-num">8</div><div class="ly-layer-name">Dados (Tracking)</div></div>
+              <div class="ly-layer-desc">Pixel · CAPI · Spend ativo + zero conversões 48h = crítico</div>
+            </div>
+          </div>
+
+          <button class="ly-run" onclick="runLayersDiag()">⟳ Gerar Diagnóstico Completo com Alfred</button>
+        </div>
+      </div><!-- /mode-layers -->
+
+      <!-- ── CRIATIVOS MODE ── -->
+      <div class="mode-panel" id="mode-criativos">
+        <div class="cr-panel">
+          <div class="cr-section">Ferramentas Criativas</div>
+          <div class="cr-grid">
+            <div class="cr-card" onclick="crMode('copy')">
+              <span class="cr-icon">✍️</span>
+              <div class="cr-title">Copy Generator</div>
+              <div class="cr-desc">3 variações — PAS, AIDA, Prova Social. Hook + problema + solução + CTA</div>
+            </div>
+            <div class="cr-card" onclick="crMode('hook')">
+              <span class="cr-icon">🎣</span>
+              <div class="cr-title">Hook Generator</div>
+              <div class="cr-desc">5 hooks para parar o scroll — dados, pergunta, provocação, número</div>
+            </div>
+            <div class="cr-card" onclick="crMode('brief')">
+              <span class="cr-icon">📋</span>
+              <div class="cr-title">Brief Criativo (UGC)</div>
+              <div class="cr-desc">Brief completo para UGC, designer ou influencer com roteiro</div>
+            </div>
+            <div class="cr-card" onclick="crMode('video')">
+              <span class="cr-icon">🎬</span>
+              <div class="cr-title">Roteiro de Vídeo</div>
+              <div class="cr-desc">Estrutura 15-30s: hook→problema→solução→prova→CTA para Meta Ads</div>
+            </div>
+            <div class="cr-card" onclick="crMode('carrossel')">
+              <span class="cr-icon">🃏</span>
+              <div class="cr-title">Estrutura Carrossel</div>
+              <div class="cr-desc">Slides: capa forte → conteúdo de valor → prova → CTA</div>
+            </div>
+            <div class="cr-card" onclick="crMode('headline')">
+              <span class="cr-icon">📰</span>
+              <div class="cr-title">Headlines</div>
+              <div class="cr-desc">10 headlines de alta conversão — LP, Google Ads, Meta Ads</div>
+            </div>
+          </div>
+          <div id="cr-form-area"></div>
+        </div>
+      </div><!-- /mode-criativos -->
+
+      <!-- ── RELATÓRIOS MODE ── -->
+      <div class="mode-panel" id="mode-relatorios">
+        <div class="rel-panel">
+          <div class="rel-section">Relatórios por Cliente</div>
+          <div class="rel-grid">
+            <div class="rel-card">
+              <span class="rel-icon">🏖</span>
+              <div class="rel-title">Nova Beach — Semanal</div>
+              <div class="rel-desc">Resumo executivo, métricas vs semana anterior, top criativos, próximos 5 passos</div>
+              <button class="rel-btn" onclick="ask('Gera relatório executivo semanal Nova Beach Campinas. Estrutura: 1) Resumo Executivo em 3 linhas (cliente lê em 30s); 2) Tabela métricas vs semana anterior — CTR/CPM/CPA/Frequência/Spend/Conversões — com variação % e classificação 🟢🟡🔴; 3) Top 3 criativos da semana com análise; 4) O que funcionou e por quê; 5) Pontos de atenção com contexto e plano (nunca só o problema); 6) Próximos 5 passos prioritários; 7) Mensagem de encerramento reforçando parceria. Cliente: arena de beach tennis em Campinas. Ad account: act_3801989686713911.')">Gerar Relatório</button>
+            </div>
+            <div class="rel-card">
+              <span class="rel-icon">🎯</span>
+              <div class="rel-title">Arena Publicidade — Semanal</div>
+              <div class="rel-desc">Relatório B2B com foco em qualidade de leads, ticket R$40k+, licenciamento</div>
+              <button class="rel-btn" onclick="ask('Gera relatório executivo semanal Arena Publicidade. Contexto: B2B, licenciamento de personagens (Turma da Mônica e outros), ticket médio R$40.000, mercado de brindes corporativos. Estrutura: 1) Resumo Executivo 3 linhas; 2) Métricas vs semana anterior (tabela: Spend/CTR/CPM/CPC/Leads/CPL/Frequência) com 🟢🟡🔴; 3) Qualidade dos leads e proximidade com o perfil ICP; 4) O que funcionou; 5) Pontos de atenção com plano; 6) Próximos 5 passos. Ad account: act_604987865349440.')">Gerar Relatório</button>
+            </div>
+            <div class="rel-card">
+              <span class="rel-icon">🍺</span>
+              <div class="rel-title">Bowa Bar — Follow-up</div>
+              <div class="rel-desc">Status do prospect + script de follow-up para fechar R$4.000/mês</div>
+              <button class="rel-btn" onclick="ask('Status Bowa Bar. Proposta enviada em bowa-bar-proposta.vercel.app para bar em Campinas — inteligência financeira automatizada com integração Zig PDV. Valor proposto: R$4.000/mês. Me dá: 1) Script de follow-up para hoje (WhatsApp, tom direto e sem pressão); 2) As 3 principais objeções esperadas de um dono de bar e como responder; 3) O argumento de valor mais forte para o caso de uso de bar; 4) Próximos 3 passos táticos para fechar.')">Status + Follow-up</button>
+            </div>
+          </div>
+
+          <div class="rel-section" style="margin-top:12px">Análises Estratégicas</div>
+          <div class="rel-grid">
+            <div class="rel-card">
+              <span class="rel-icon">🔄</span>
+              <div class="rel-title">Diagnóstico de Funil</div>
+              <div class="rel-desc">ToFu → MoFu → BoFu → Pós-venda — identifica onde está perdendo conversão</div>
+              <button class="rel-btn" onclick="ask('Modo: Estrategista de Funil Completo. Analisa os 4 estágios: ToFu (frio) → MoFu (morno) → BoFu (quente) → Pós-venda. Me faz 5 perguntas sobre métricas de cada etapa, depois identifica o maior gargalo de conversão e entrega plano de ação prioritário com métricas a monitorar.')">Iniciar Diagnóstico</button>
+            </div>
+            <div class="rel-card">
+              <span class="rel-icon">📈</span>
+              <div class="rel-title">Plano de Escala</div>
+              <div class="rel-desc">Quando e como escalar budget sem quebrar o algoritmo (Layer 6 protegido)</div>
+              <button class="rel-btn" onclick="ask('Modo: Estrategista de Escala — Meta Ads. Antes de qualquer recomendação, me faz 4 perguntas: CPA atual vs histórico, status do algoritmo (Layer 6), frequência das campanhas, e ROAS ou CPL dos últimos 14 dias. Depois entrego: 1) Checklist de validação antes de escalar; 2) Regras de aumento seguro (% por semana); 3) Layers críticos a monitorar durante a escala; 4) KPIs de alerta para pausar o crescimento.')">Planejar Escala</button>
+            </div>
+            <div class="rel-card">
+              <span class="rel-icon">💡</span>
+              <div class="rel-title">Hipóteses da Semana</div>
+              <div class="rel-desc">3 hipóteses testáveis — criativo, funil e público — formato SE/ENTÃO</div>
+              <button class="rel-btn" onclick="ask('Gera 3 hipóteses de teste para essa semana. Uma de criativo (Layer 2), uma de funil (Layer 3-4), uma de público (Layer 1 ou 7). Formato obrigatório: SE [ação específica e mensurável] ENTÃO [resultado esperado em % ou R$] PORQUE [raciocínio baseado em dado]. Para cada hipótese: métrica principal, tempo de validação e critério de sucesso.')">Gerar Hipóteses</button>
+            </div>
+            <div class="rel-card">
+              <span class="rel-icon">📊</span>
+              <div class="rel-title">Análise de CPM Alto</div>
+              <div class="rel-desc">CPM elevado? Diagnóstico de leilão, concorrência, criativo e sazonalidade</div>
+              <button class="rel-btn" onclick="ask('Diagnóstico de CPM elevado — Layer 7. Quero entender: 1) Os 5 fatores que afetam o CPM no leilão Meta Ads (quality score, audience overlap, sazonalidade, concorrência, relevância do criativo); 2) Como diagnosticar se o problema é criativo vs audience vs timing vs concorrência — perguntas que devo fazer e métricas a comparar; 3) Ações práticas para reduzir CPM sem sacrificar qualidade do resultado; 4) Quando CPM alto pode ser sinal positivo de escala possível.')">Analisar CPM</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /mode-relatorios -->
+
+      <!-- ── TRACKER MODE ── -->
+      <div class="mode-panel" id="mode-tracker">
+        <div class="tk-panel">
+          <div class="ly-section">Auditoria de Tracking</div>
+          <div class="vx-topbar">
+            <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+              <label>URL para auditar</label>
+              <input type="text" id="tk-url" placeholder="https://seusite.com.br/landing-page">
+            </div>
+            <button class="tk-fetch-btn" onclick="trackerFetch()">🔍 Auditar</button>
+            <button class="tk-fetch-btn" onclick="trackerPaste()" style="border-color:#9b59b650;color:#9b59b670">📋 Colar HTML</button>
+          </div>
+
+          <div id="tk-paste-area" style="display:none">
+            <div class="ly-section">Colar HTML da Página</div>
+            <textarea class="cr-textarea" id="tk-html-paste" placeholder="Cole aqui o código-fonte da página (Ctrl+U no navegador, Ctrl+A + Ctrl+C)" style="min-height:120px"></textarea>
+            <button class="tk-fetch-btn" onclick="trackerAnalyzeHTML(document.getElementById('tk-html-paste').value)">🔍 Analisar HTML</button>
+          </div>
+
+          <div id="tk-score-area" style="display:none">
+            <div class="tk-score-bar">
+              <div>
+                <div class="tk-score-num" id="tk-score-num">—</div>
+                <div class="tk-score-label">Health Score</div>
+              </div>
+              <div style="flex:1">
+                <div class="tk-score-bar-track">
+                  <div class="tk-score-bar-fill" id="tk-score-fill" style="width:0%"></div>
+                </div>
+                <div style="font-size:8.5px;color:#00d4ff35;margin-top:4px" id="tk-score-status"></div>
+              </div>
+            </div>
+            <div class="tk-check-list" id="tk-checks"></div>
+            <button class="ly-run" onclick="trackerDiagnoseAI()" style="margin-top:8px">🔍 Diagnóstico Completo com Alfred</button>
+          </div>
+
+          <div style="font-size:9px;color:#00d4ff20;letter-spacing:.5px;line-height:1.8;padding:6px 0">
+            Verifica: Meta Pixel · CAPI · GA4 · GTM · UTMs · Pixel duplicado · Events
+          </div>
+        </div>
+      </div><!-- /mode-tracker -->
+
+      <!-- ── PROTECTOR MODE ── -->
+      <div class="mode-panel" id="mode-protector">
+        <div class="pt-panel">
+          <div class="ly-section">Budget Protector — Regras de Automação</div>
+          <div class="vx-topbar">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <label>Conta</label>
+              <select id="pt-account">
+                <option value="act_3801989686713911">Nova Beach Campinas</option>
+                <option value="act_604987865349440">Arena Publicidade</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <label>Token</label>
+              <input type="text" id="pt-token" placeholder="Access Token Meta" style="width:220px">
+            </div>
+            <label class="pt-toggle">
+              <input type="checkbox" id="pt-safemode" checked>
+              Safe Mode (simular)
+            </label>
+            <button class="vx-fetch-btn" onclick="protectorRun()">▶ Executar Regras</button>
+          </div>
+
+          <div class="ly-section">Regras Configuradas</div>
+          <div id="pt-rules">
+            <!-- regras default inseridas por JS -->
+          </div>
+          <button class="pt-add-btn" onclick="ptAddRule()">+ Adicionar Regra</button>
+
+          <div class="ly-section" style="margin-top:12px">Log de Execução</div>
+          <div class="pt-log" id="pt-log">Aguardando execução das regras...</div>
+        </div>
+      </div><!-- /mode-protector -->
+
+      <!-- ── DEMOGRAPHICS MODE ── -->
+      <div class="mode-panel" id="mode-demographics">
+        <div class="dm-panel">
+          <div class="vx-topbar">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <label>Conta</label>
+              <select id="dm-account">
+                <option value="act_3801989686713911">Nova Beach Campinas</option>
+                <option value="act_604987865349440">Arena Publicidade</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <label>Período</label>
+              <select id="dm-period">
+                <option value="last_7d">7 dias</option>
+                <option value="last_14d">14 dias</option>
+                <option value="last_30d">30 dias</option>
+                <option value="this_month">Mês atual</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+              <label>Token</label>
+              <input type="text" id="dm-token" placeholder="Access Token Meta">
+            </div>
+            <button class="vx-fetch-btn" onclick="demographicsFetch()">⟳ Buscar</button>
+            <button class="vx-fetch-btn" onclick="demographicsDiagnose()" style="border-color:#9b59b650;color:#9b59b670">🔍 IA</button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div class="vx-section">Por Idade — Spend</div>
+              <div id="dm-age-chart"><div class="vx-empty">Busque dados para visualizar</div></div>
+            </div>
+            <div>
+              <div class="vx-section">Por Gênero</div>
+              <div id="dm-gender-chart"><div class="vx-empty">Busque dados para visualizar</div></div>
+            </div>
+          </div>
+
+          <div class="vx-section">Top Segmentos — Melhor Performance</div>
+          <div id="dm-top-segments"><div class="vx-empty">Carregue dados para ver os melhores segmentos</div></div>
+        </div>
+      </div><!-- /mode-demographics -->
+
+      <!-- ── UTM MODE ── -->
+      <div class="mode-panel" id="mode-utm">
+        <div class="utm-panel">
+          <div class="ly-section">Construtor de URL com UTM</div>
+          <div class="ly-grid">
+            <div class="ly-field">
+              <label class="ly-label">URL Base</label>
+              <input class="ly-input" id="utm-url" placeholder="https://seusite.com.br/pagina">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Source</label>
+              <input class="ly-input" id="utm-source" placeholder="facebook">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Medium</label>
+              <input class="ly-input" id="utm-medium" placeholder="paid_social">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Campaign</label>
+              <input class="ly-input" id="utm-campaign" placeholder="nova_beach_matricula_abr26">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Content (criativo)</label>
+              <input class="ly-input" id="utm-content" placeholder="video_ugc_hook_praia">
+            </div>
+            <div class="ly-field">
+              <label class="ly-label">Term (público)</label>
+              <input class="ly-input" id="utm-term" placeholder="mulheres_25_40_campinas">
+            </div>
+          </div>
+
+          <div class="ly-section">Templates Rápidos</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="utm-tpl-btn" onclick="utmTemplate('facebook','paid_social')">Meta Feed</button>
+            <button class="utm-tpl-btn" onclick="utmTemplate('instagram','paid_social')">IG Stories</button>
+            <button class="utm-tpl-btn" onclick="utmTemplate('google','cpc')">Google Search</button>
+            <button class="utm-tpl-btn" onclick="utmTemplate('linkedin','paid_social')">LinkedIn Ads</button>
+            <button class="utm-tpl-btn" onclick="utmTemplate('whatsapp','crm')">WhatsApp CRM</button>
+            <button class="utm-tpl-btn" onclick="utmTemplate('email','email')">Email Marketing</button>
+          </div>
+
+          <div class="ly-section">URL Gerada</div>
+          <div class="utm-output" id="utm-output" onclick="utmCopy()" title="Clique para copiar">
+            Preencha os campos acima para gerar a URL
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="tk-fetch-btn" onclick="utmCopy()">📋 Copiar URL</button>
+            <button class="tk-fetch-btn" onclick="utmSave()" style="border-color:#00c97a50;color:#00c97a70">💾 Salvar na Biblioteca</button>
+          </div>
+
+          <div class="ly-section" style="margin-top:8px">Biblioteca de Links</div>
+          <div id="utm-library">
+            <div class="vx-empty" style="font-size:9px">Nenhum link salvo ainda</div>
+          </div>
+        </div>
+      </div><!-- /mode-utm -->
+
+    </div><!-- /mode-content -->
+
+    <div class="status-bar">
+      <span class="sdot"></span>
+      <span id="status-bottom">Aguardando · Ollama Local · Qwen2.5:14B</span>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="rpanel-lbl">Ações Rápidas</div>
+
+    <button class="abtn" onclick="saveToObsidian()" title="Salva a última resposta do Alfred no Obsidian">
+      <span class="ic">🧠</span>Salvar Obsidian
+    </button>
+    <button class="abtn" onclick="window.open('https://meta-arena.vercel.app','_blank')">
+      <span class="ic">📊</span>VÓRTEX
+    </button>
+    <button class="abtn" onclick="window.open('https://app.clickup.com','_blank')">
+      <span class="ic">📋</span>ClickUp
+    </button>
+    <button class="abtn" onclick="window.open('https://business.facebook.com/adsmanager','_blank')">
+      <span class="ic">📈</span>Meta Ads
+    </button>
+    <button class="abtn" onclick="window.open('https://analytics.google.com','_blank')">
+      <span class="ic">📉</span>Google Analytics
+    </button>
+
+    <div class="rpanel-div"></div>
+    <div class="rpanel-lbl">Relatórios</div>
+
+    <button class="abtn" onclick="ask('Gera relatório executivo semanal Nova Beach. Estrutura: Resumo Executivo (3 linhas), Métricas vs semana anterior (tabela com CTR/CPM/CPA/ROAS), Top criativos, Pontos de atenção com plano, Próximos 5 passos.')">
+      <span class="ic">📄</span>Rel. Nova Beach
+    </button>
+    <button class="abtn" onclick="ask('Gera relatório executivo semanal Arena Publicidade. B2B licenciamento ticket R$40k. Estrutura: Resumo Executivo, Métricas vs semana anterior (tabela), O que funcionou, Oportunidades, Próximos 5 passos.')">
+      <span class="ic">📄</span>Rel. Arena Pub
+    </button>
+    <button class="abtn" onclick="ask('Status Bowa Bar: próximos passos para fechar o prospect. O que fazer hoje para avançar a proposta? Proposta enviada em bowa-bar-proposta.vercel.app, valor R$4.000/mês.')">
+      <span class="ic">🍺</span>Status Bowa Bar
+    </button>
+
+    <div class="rpanel-div"></div>
+    <div class="rpanel-lbl">Ferramentas</div>
+
+    <button class="abtn" onclick="ask('Modo: Copywriter. Cria 3 variações de copy para anúncio. Primeiro me faz 3 perguntas para entender: cliente, público, objetivo e oferta. Depois gera os copies com hook, desenvolvimento, prova e CTA.')">
+      <span class="ic">✍️</span>Copy Generator
+    </button>
+    <button class="abtn" onclick="ask('Modo: Diagnóstico 8 Layers. Me pede os dados das campanhas (CTR, CPM, CPA, frequência, conversões, budget gasto) e faço diagnóstico completo pelos 8 layers com classificação 🟢🟡🔴 para cada.')">
+      <span class="ic">🔍</span>8 Layers Diag.
+    </button>
+    <button class="abtn" onclick="ask('Gera 3 hipóteses de teste para essa semana. Uma de criativo (Layer 2), uma de funil (Layer 3 ou 4), uma de público (Layer 1 ou 7). Formato: Hipótese: [ação] vai [resultado] porque [raciocínio com dado real].')">
+      <span class="ic">💡</span>Hipóteses
+    </button>
+    <button class="abtn" onclick="ask('Modo: Estrategista de Funil. Analisa o funil ToFu/MoFu/BoFu atual e identifica onde está perdendo conversões. Me faz perguntas sobre as métricas de cada etapa.')">
+      <span class="ic">🔄</span>Funil Completo
+    </button>
+
+    <div class="rpanel-div"></div>
+    <div class="rpanel-lbl">Sistema</div>
+
+    <div class="sys-info">
+      <div id="ollama-r">Engine: verificando...</div>
+      <div>Model: Qwen2.5 14B</div>
+      <div>KB: carregado</div>
+      <div id="sys-date">—</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── KNOWLEDGE & CONFIG ──
+const KB = document.getElementById('kb').textContent.trim();
+const OLLAMA = 'http://localhost:11434/api/chat';
+const MODEL  = 'qwen2.5:14b';
+const MAX_MSGS = 20;
+const OBSIDIAN_VAULT = 'Obsidian Vault';
+const OBSIDIAN_API  = 'http://localhost:8092';
+
+// ── OBSIDIAN CONTEXT ──
+let obsidianOnline = false;
+let dailyContext   = '';
+
+async function checkObsidian(){
+  try{
+    const r = await fetch(OBSIDIAN_API + '/health', {signal: AbortSignal.timeout(2000)});
+    obsidianOnline = r.ok;
+    if(obsidianOnline && !dailyContext){
+      const d = await (await fetch(OBSIDIAN_API + '/context')).json();
+      dailyContext = d.context || '';
+    }
+  } catch{ obsidianOnline = false; }
+}
+checkObsidian();
+setInterval(checkObsidian, 60000);
+
+async function getVaultContext(query){
+  if(!obsidianOnline) return '';
+  try{
+    const r = await fetch(`${OBSIDIAN_API}/search?q=${encodeURIComponent(query)}`);
+    const notes = await r.json();
+    if(!notes.length) return '';
+    return '## CONTEXTO DO OBSIDIAN VAULT (notas relevantes):\n' +
+      notes.map(n => `### ${n.name}\n${n.text.substring(0,1000)}`).join('\n\n');
+  } catch{ return ''; }
+}
+
+const SYSTEM = `Você é o ALFRED — sistema neural de inteligência de marketing da Tático Performance.
+
+IDENTIDADE E COMPORTAMENTO:
+- Head de Performance virtual do Thiago Saldini Salim (TSS Marketing / Tático Performance)
+- Especialista em Meta Ads BR, copy, funil, CRM, landing pages, growth, relatórios
+- DIRETO, ESTRATÉGICO, orientado a resultado. NUNCA genérico ou vago.
+- SEMPRE em português brasileiro.
+- Identifique o GARGALO PRINCIPAL antes de qualquer recomendação.
+- Classifique diagnósticos: 🟢 Saudável / 🟡 Atenção / 🔴 Crítico.
+- NUNCA pausar ad set em fase de aprendizado (Layer 6).
+- Use 8 layers de diagnóstico ANTES de qualquer ação em campanhas.
+- Por VOZ: máximo 3 frases curtas e objetivas.
+- Por TEXTO: use markdown estruturado (tabelas, **negrito**, bullets, ## headers).
+- Resultado > vaidade — curtidas não pagam boleto.
+- Questione premissas quando o usuário está resolvendo o problema errado.
+
+BASE DE CONHECIMENTO COMPLETA:
+${KB}`;
+
+// ── STATE ──
+let messages = [];
+let isThinking = false;
+let isListening = false;
+let recognition = null;
+let lastReply = '';
+const synth = window.speechSynthesis;
+
+// ── NEURAL CANVAS — NETWORK WITH SYNAPSE PULSES ──
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W, H;
+const resize = ()=>{ W = cv.width = innerWidth; H = cv.height = innerHeight; };
+resize(); window.addEventListener('resize', resize);
+
+// Neural nodes
+class Node {
+  constructor(){
+    this.x = Math.random()*W;
+    this.y = Math.random()*H;
+    this.vx = (Math.random()-.5)*.22;
+    this.vy = (Math.random()-.5)*.22;
+    this.r = Math.random()*.9+.3;
+    this.baseO = Math.random()*.04+.015;
+    this.o = this.baseO;
+    this.pulseT = 0;
+  }
+  tick(){
+    this.x += this.vx; this.y += this.vy;
+    if(this.x<0||this.x>W) this.vx*=-1;
+    if(this.y<0||this.y>H) this.vy*=-1;
+    if(this.pulseT > 0){
+      this.pulseT -= 1;
+      this.o = this.baseO + (this.pulseT/20)*0.6;
+    } else {
+      this.o = this.baseO;
+    }
+  }
+  pulse(){ this.pulseT = 20; }
+}
+
+// Synapse pulses traveling along connections
+class Pulse {
+  constructor(from, to, color){
+    this.from = from;
+    this.to = to;
+    this.t = 0; // 0..1
+    this.speed = Math.random()*.018 + .010;
+    this.color = color;
+    this.size = Math.random()*.8 + .6;
+  }
+  tick(){ this.t += this.speed; return this.t >= 1; }
+  draw(){
+    const x = this.from.x + (this.to.x - this.from.x)*this.t;
+    const y = this.from.y + (this.to.y - this.from.y)*this.t;
+    const fade = Math.sin(this.t * Math.PI);
+    ctx.beginPath();
+    ctx.arc(x, y, this.size, 0, Math.PI*2);
+    ctx.fillStyle = this.color.replace('ALPHA', (fade*.55).toFixed(2));
+    ctx.fill();
+  }
+}
+
+const NODES = Array.from({length:28}, ()=>new Node());
+let pulses = [];
+let pulseTimer = 0;
+
+const stateColor = ()=>{
+  const b = document.body.classList;
+  if(b.contains('listening')) return {r:'0,201,122', pulse:'rgba(0,201,122,ALPHA)'};
+  if(b.contains('thinking'))  return {r:'155,89,182', pulse:'rgba(155,89,182,ALPHA)'};
+  if(b.contains('speaking'))  return {r:'255,107,0', pulse:'rgba(255,107,0,ALPHA)'};
+  return {r:'0,212,255', pulse:'rgba(0,212,255,ALPHA)'};
+};
+
+// Build connection map (nodes within range)
+const CONNECTION_DIST = 130;
+let connections = [];
+
+function buildConnections(){
+  connections = [];
+  for(let i=0; i<NODES.length; i++){
+    for(let j=i+1; j<NODES.length; j++){
+      const dx = NODES[i].x - NODES[j].x;
+      const dy = NODES[i].y - NODES[j].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if(d < CONNECTION_DIST) connections.push({i, j, d});
+    }
+  }
+}
+
+(function frame(){
+  ctx.clearRect(0,0,W,H);
+  NODES.forEach(n=>n.tick());
+
+  const sc = stateColor();
+
+  // Draw connections
+  for(let i=0; i<NODES.length; i++){
+    for(let j=i+1; j<NODES.length; j++){
+      const dx = NODES[i].x - NODES[j].x;
+      const dy = NODES[i].y - NODES[j].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if(d < CONNECTION_DIST){
+        const a = (1 - d/CONNECTION_DIST)*0.03;
+        ctx.beginPath();
+        ctx.moveTo(NODES[i].x, NODES[i].y);
+        ctx.lineTo(NODES[j].x, NODES[j].y);
+        ctx.strokeStyle = `rgba(${sc.r},${a.toFixed(3)})`;
+        ctx.lineWidth = .5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw nodes
+  NODES.forEach(n=>{
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${sc.r},${n.o.toFixed(3)})`;
+    ctx.fill();
+  });
+
+  // Spawn new pulses
+  pulseTimer++;
+  const spawnRate = document.body.classList.contains('thinking') ? 2 :
+                    document.body.classList.contains('listening') ? 3 :
+                    document.body.classList.contains('speaking') ? 2 : 5;
+  if(pulseTimer % spawnRate === 0 && pulses.length < 10){
+    // Pick two random close nodes
+    const idx = Math.floor(Math.random()*NODES.length);
+    const nA = NODES[idx];
+    // Find a neighbor
+    let best = -1, bestD = Infinity;
+    for(let k=0; k<NODES.length; k++){
+      if(k===idx) continue;
+      const dx = nA.x-NODES[k].x, dy = nA.y-NODES[k].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if(d < CONNECTION_DIST && d < bestD && Math.random()>.3){
+        bestD = d; best = k;
+      }
+    }
+    if(best !== -1){
+      pulses.push(new Pulse(nA, NODES[best], sc.pulse));
+    }
+  }
+
+  // Update & draw pulses
+  pulses = pulses.filter(p=>{
+    const done = p.tick();
+    if(!done) p.draw();
+    if(done){ p.to.pulse(); }
+    return !done;
+  });
+
+  requestAnimationFrame(frame);
+})();
+
+// ── HUD DYNAMIC METRICS ──
+const hudMetrics = {
+  sync: document.getElementById('hud-sync'),
+  latency: document.getElementById('hud-latency'),
+  nodes: document.getElementById('hud-nodes'),
+  tokens: document.getElementById('hud-tokens'),
+  temp: document.getElementById('hud-temp'),
+  msgs: document.getElementById('hud-msgs'),
+};
+
+let tokenCount = 0;
+setInterval(()=>{
+  if(hudMetrics.sync){
+    const v = 94 + Math.floor(Math.random()*5);
+    hudMetrics.sync.textContent = v+'%';
+  }
+  if(hudMetrics.latency){
+    const l = 8 + Math.floor(Math.random()*18);
+    hudMetrics.latency.textContent = l+'ms';
+  }
+  if(hudMetrics.nodes){
+    hudMetrics.nodes.textContent = (105 + Math.floor(Math.random()*15)).toString();
+  }
+  if(hudMetrics.msgs){
+    hudMetrics.msgs.textContent = messages.length.toString();
+  }
+}, 1800);
+
+setInterval(()=>{
+  if(isThinking && hudMetrics.tokens){
+    tokenCount += Math.floor(Math.random()*12)+3;
+    hudMetrics.tokens.textContent = tokenCount.toString();
+  }
+}, 120);
+
+// ── STATUS ──
+function setState(s, txt){
+  document.body.className = s;
+  document.getElementById('top-status').textContent = txt;
+  document.getElementById('status-bottom').textContent = txt;
+  if(s === '' || s === 'idle'){
+    tokenCount = 0;
+    if(hudMetrics.tokens) hudMetrics.tokens.textContent = '—';
+  }
+}
+
+// ── MARKDOWN ──
+function md(text){
+  const lines = text.split('\n');
+  let html = '';
+  let inTable = false;
+  let thDone = false;
+
+  for(let i=0; i<lines.length; i++){
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if(/^\|.+\|$/.test(trimmed)){
+      if(!inTable){ html += '<table>'; inTable=true; thDone=false; }
+      if(/^\|[-| :]+\|$/.test(trimmed)){ thDone=true; continue; }
+      const tag = thDone ? 'td' : 'th';
+      const cells = trimmed.slice(1,-1).split('|').map(c=>c.trim());
+      html += '<tr>' + cells.map(c=>`<${tag}>${imd(c)}</${tag}>`).join('') + '</tr>';
+      continue;
+    }
+    if(inTable){ html += '</table>'; inTable=false; thDone=false; }
+
+    if(line.startsWith('### ')) { html += `<h4>${imd(line.slice(4))}</h4>`; continue; }
+    if(line.startsWith('## '))  { html += `<h3>${imd(line.slice(3))}</h3>`; continue; }
+    if(line.startsWith('# '))   { html += `<h3>${imd(line.slice(2))}</h3>`; continue; }
+    if(/^[-─]{3,}$/.test(trimmed)) { html += '<hr>'; continue; }
+    if(/^[-•*] /.test(line)) { html += `<li>${imd(line.replace(/^[-•*] /,''))}</li>`; continue; }
+    if(/^\d+\. /.test(line)) { html += `<li>${imd(line.replace(/^\d+\. /,''))}</li>`; continue; }
+    if(!trimmed) { html += '<br>'; continue; }
+    html += `<p>${imd(line)}</p>`;
+  }
+  if(inTable) html += '</table>';
+  return html;
+}
+
+function imd(t){
+  return t
+    .replace(/🔴/g,'<span class="crit">🔴</span>')
+    .replace(/🟡/g,'<span class="warn">🟡</span>')
+    .replace(/🟢/g,'<span class="ok">🟢</span>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>');
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── CHAT UI ──
+function addMsg(role, content, isHtml){
+  const h = document.getElementById('chat-history');
+  const d = document.createElement('div');
+  d.className = `msg msg-${role}`;
+  const lbl = role === 'user' ? 'Você' : 'Alfred';
+  const body = isHtml ? content : esc(content);
+  d.innerHTML = `<div class="msg-lbl">${lbl}</div><div class="msg-bubble">${body}</div>`;
+  if(role === 'alfred') d.id = 'streaming-msg';
+  h.appendChild(d);
+  h.scrollTop = h.scrollHeight;
+  if(hudMetrics.msgs) hudMetrics.msgs.textContent = messages.length.toString();
+  return d;
+}
+
+function updateStreaming(html, done){
+  const d = document.getElementById('streaming-msg');
+  if(!d) return;
+  const b = d.querySelector('.msg-bubble');
+  if(!b) return;
+  b.innerHTML = html + (done ? '' : '<span class="cursor"></span>');
+  const h = document.getElementById('chat-history');
+  h.scrollTop = h.scrollHeight;
+  if(done) d.id = '';
+}
+
+// ── SEND ──
+async function send(text){
+  if(!text.trim() || isThinking) return;
+  isThinking = true;
+  tokenCount = 0;
+  setState('thinking','Consultando Obsidian...');
+  document.getElementById('interim').textContent = '';
+
+  addMsg('user', text, false);
+  if(messages.length > MAX_MSGS) messages = messages.slice(-MAX_MSGS);
+  messages.push({role:'user', content:text});
+
+  addMsg('alfred', '<span class="cursor"></span>', true);
+
+  // Busca contexto dinâmico do Obsidian Vault
+  const vaultCtx = await getVaultContext(text);
+  const systemWithVault = SYSTEM + (dailyContext ? `\n\n## CONTEXTO DIÁRIO DO VAULT:\n${dailyContext.substring(0,2000)}` : '')
+                                 + (vaultCtx ? `\n\n${vaultCtx}` : '');
+
+  setState('thinking','Processando...');
+  let fullReply = '';
+
+  try {
+    const r = await fetch(OLLAMA, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [{role:'system', content:systemWithVault}, ...messages],
+        stream: true
+      })
+    });
+
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      const chunk = dec.decode(value, {stream:true});
+      for(const line of chunk.split('\n')){
+        if(!line.trim()) continue;
+        try{
+          const data = JSON.parse(line);
+          if(data.message?.content){
+            fullReply += data.message.content;
+            updateStreaming(md(fullReply), false);
+          }
+        } catch{}
+      }
+    }
+
+    updateStreaming(md(fullReply), true);
+    lastReply = fullReply;
+    messages.push({role:'assistant', content:fullReply});
+    if(hudMetrics.msgs) hudMetrics.msgs.textContent = messages.length.toString();
+    setState('speaking','Sintetizando voz...');
+
+    const tts = fullReply.replace(/[*#`|\n]/g,' ').replace(/\s+/g,' ').trim().substring(0,260);
+    speak(tts);
+
+  } catch(e){
+    // Ollama offline — fallback automático para Claude API
+    try {
+      setState('thinking','Claude API...');
+      const cr = await fetch('/api/claude', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ system: systemWithVault, messages })
+      });
+      if(!cr.ok) throw new Error('Claude API error');
+      const cd = await cr.json();
+      fullReply = cd.content[0].text;
+      updateStreaming(md(fullReply), true);
+      lastReply = fullReply;
+      messages.push({role:'assistant', content: fullReply});
+      if(hudMetrics.msgs) hudMetrics.msgs.textContent = messages.length.toString();
+      setState('speaking','Sintetizando voz...');
+      const ttsFb = fullReply.replace(/[*#`|\n]/g,' ').replace(/\s+/g,' ').trim().substring(0,260);
+      speak(ttsFb);
+    } catch(ce){
+      updateStreaming(
+        `<span class="crit">⚠ Ollama offline ou modelo não encontrado.</span><br><br>` +
+        `Verifique se o Ollama está rodando:<br><code>ollama serve</code>`,
+        true
+      );
+      setState('','Offline');
+      isThinking = false;
+    }
+  }
+}
+
+// ── INPUT ──
+function sendInput(){
+  const inp = document.getElementById('text-input');
+  const v = inp.value.trim();
+  if(v){ inp.value = ''; send(v); }
+}
+
+function ask(text){ send(text); }
+
+function clearChat(){
+  messages = [];
+  lastReply = '';
+  isThinking = false;
+  tokenCount = 0;
+  synth.cancel();
+  if(isListening && recognition){ recognition.stop(); isListening=false; }
+  document.getElementById('mic-btn').classList.remove('active');
+  setState('','Aguardando');
+  if(hudMetrics.msgs) hudMetrics.msgs.textContent = '0';
+  if(hudMetrics.tokens) hudMetrics.tokens.textContent = '—';
+  document.getElementById('chat-history').innerHTML =
+    `<div class="msg msg-alfred">
+      <div class="msg-lbl">Alfred</div>
+      <div class="msg-bubble">Chat limpo. Pronto para novo diagnóstico.</div>
+    </div>`;
+}
+
+// ── VOICE INPUT ──
+function initRec(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Use Google Chrome para reconhecimento de voz (Web Speech API).'); return null; }
+  const r = new SR();
+  r.lang = 'pt-BR'; r.continuous = false; r.interimResults = true;
+  r.onstart  = ()=>{ setState('listening','Ouvindo — fale agora...'); document.getElementById('interim').textContent=''; };
+  r.onresult = e=>{ document.getElementById('interim').textContent = Array.from(e.results).map(x=>x[0].transcript).join(''); };
+  r.onend    = ()=>{
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('active');
+    const t = document.getElementById('interim').textContent.trim();
+    document.getElementById('interim').textContent = '';
+    if(t) send(t);
+    else setState('','Aguardando');
+  };
+  r.onerror  = ()=>{ isListening=false; document.getElementById('mic-btn').classList.remove('active'); setState('','Erro no microfone'); };
+  return r;
+}
+
+function toggleListen(){
+  if(isThinking) return;
+  if(!recognition) recognition = initRec();
+  if(!recognition) return;
+  if(isListening){ recognition.stop(); isListening=false; document.getElementById('mic-btn').classList.remove('active'); }
+  else{ try{ recognition.start(); isListening=true; document.getElementById('mic-btn').classList.add('active'); } catch(e){ recognition=null; } }
+}
+
+// ── VOICE OUTPUT — Edge TTS Neural (pt-BR-AntonioNeural) ──
+const TTS_URL = 'http://localhost:8091';
+let ttsAudio = null;
+let ttsOnline = false;
+
+async function checkTTS(){
+  try{
+    const r = await fetch(TTS_URL + '?text=ok', {signal: AbortSignal.timeout(3000)});
+    ttsOnline = r.ok;
+  } catch{ ttsOnline = false; }
+}
+checkTTS();
+setInterval(checkTTS, 30000);
+
+function speak(text){
+  if(!text.trim()){ setState('','Aguardando'); isThinking=false; return; }
+
+  // Limpa audio anterior
+  if(ttsAudio){ ttsAudio.pause(); ttsAudio = null; }
+  synth.cancel();
+
+  const clean = text.replace(/[*#`|_~\[\]]/g,' ').replace(/\s+/g,' ').trim().substring(0, 400);
+  const done  = ()=>{ setState('','Aguardando'); isThinking=false; };
+
+  if(ttsOnline){
+    // Usa voz neural Antonio (Edge TTS)
+    setState('speaking','Respondendo...');
+    fetch(TTS_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: clean,
+      signal: AbortSignal.timeout(15000)
+    })
+    .then(r => r.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      ttsAudio  = new Audio(url);
+      ttsAudio.onended  = ()=>{ URL.revokeObjectURL(url); ttsAudio=null; done(); };
+      ttsAudio.onerror  = done;
+      ttsAudio.play();
+    })
+    .catch(done);
+  } else {
+    // Fallback: Web Speech API nativa
+    const voices = synth.getVoices();
+    const v = voices.find(x=>x.lang==='pt-BR') || voices.find(x=>x.lang.startsWith('pt'));
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang='pt-BR'; u.rate=1.05; u.pitch=0.95;
+    if(v) u.voice=v;
+    const safety = setTimeout(done, 20000);
+    u.onstart = ()=>setState('speaking','Respondendo...');
+    u.onend   = ()=>{ clearTimeout(safety); done(); };
+    u.onerror = ()=>{ clearTimeout(safety); done(); };
+    synth.speak(u);
+  }
+}
+if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = ()=>{};
+
+// ── OBSIDIAN SAVE ──
+function saveToObsidian(){
+  if(!lastReply){ alert('Faça uma pergunta ao Alfred primeiro.'); return; }
+  const now = new Date();
+  const date = now.toISOString().split('T')[0];
+  const hhmm = now.toTimeString().slice(0,5).replace(':','-');
+  const title = `Alfred-${date}-${hhmm}`;
+  const note = `# Alfred Note — ${now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}\n\n${lastReply}\n\n---\n*Salvo automaticamente pelo Alfred — Tático Performance*\nTags: #alfred #performance #marketing`;
+  const uri = `obsidian://new?vault=${encodeURIComponent(OBSIDIAN_VAULT)}&name=${encodeURIComponent(title)}&content=${encodeURIComponent(note)}`;
+  window.open(uri, '_blank');
+}
+
+// ── LEFT PANEL TOGGLE ──
+function toggleLeft(){
+  const p = document.getElementById('left-panel');
+  const a = document.getElementById('left-arrow');
+  p.classList.toggle('collapsed');
+  if(a) a.textContent = p.classList.contains('collapsed') ? '►' : '◄';
+}
+
+// ── SERVER PING ──
+async function pingOllama(){
+  try{
+    const r = await fetch('http://localhost:11434/api/tags', {signal:AbortSignal.timeout(4000)});
+    if(r.ok){
+      const d = await r.json();
+      const hasModel = d.models?.some(m => m.name?.includes('qwen2.5'));
+      document.getElementById('top-status').textContent = hasModel ? 'Online · Ollama Local · Qwen2.5:14B' : 'Ollama online — modelo não encontrado';
+      document.getElementById('status-bottom').textContent = hasModel ? 'Alfred · Ollama Local · qwen2.5:14b · pronto' : 'Execute: ollama pull qwen2.5:14b';
+      const el = document.getElementById('ollama-r');
+      if(el) el.textContent = 'Engine: Ollama Local';
+      if(document.getElementById('hud-engine')) document.getElementById('hud-engine').textContent = 'LOCAL';
+      if(document.getElementById('hud-model')) document.getElementById('hud-model').textContent = 'QWEN14B';
+    } else throw new Error('not ok');
+  } catch{
+    const isCloud = location.protocol === 'https:';
+    document.getElementById('top-status').textContent = isCloud ? 'Online · Claude API · claude-sonnet-4-6' : 'Ollama OFFLINE';
+    document.getElementById('status-bottom').textContent = isCloud ? 'Alfred · Cloud Mode · Claude API · pronto' : 'Execute: ollama serve';
+    const el = document.getElementById('ollama-r');
+    if(el){ el.textContent = isCloud ? 'Engine: Claude API' : 'Engine: OFFLINE'; if(!isCloud) el.style.color='#ff6b0060'; }
+    if(document.getElementById('hud-engine')){
+      document.getElementById('hud-engine').textContent = isCloud ? 'CLAUDE' : 'OFFLINE';
+      if(!isCloud) document.getElementById('hud-engine').style.color = '#ff6b0080';
+    }
+    if(document.getElementById('hud-model') && isCloud) document.getElementById('hud-model').textContent = 'SONNET';
+  }
+}
+
+// ── DATE & SPRINT ──
+function updateDate(){
+  const now = new Date();
+  const days     = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const sprints  = {1:'Estratégia',2:'Criativo',3:'Testes',4:'Controle',5:'Consolidação'};
+  const tasks    = {
+    1:['Analisar dados da semana anterior','Definir 3 hipóteses de teste','Planejar criativos da semana'],
+    2:['Produzir anúncios planejados','Ativar backlog criativo','Revisar copies em veiculação'],
+    3:['Subir testes A/B novos','Encerrar testes antigos','Analisar variações'],
+    4:['Checar pacing dos budgets','Ajustes emergenciais','Verificar frequência'],
+    5:['Documentar resultados','Preparar relatórios','Planejar próximo ciclo'],
+  };
+  const day    = now.getDay();
+  const sprint = sprints[day] || 'Descanso';
+  const date   = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+
+  document.getElementById('top-date').textContent = date;
+  document.getElementById('top-sprint').textContent = `${days[day]} · ${sprint}`;
+  document.getElementById('sprint-title').textContent = `📅 ${days[day]} — ${sprint}`;
+  if(document.getElementById('sys-date')) document.getElementById('sys-date').textContent = date;
+
+  const items = tasks[day] || ['Planejamento livre'];
+  document.getElementById('sprint-items').innerHTML =
+    items.map(i=>`<div class="bitem" style="cursor:default;pointer-events:none">${i}</div>`).join('');
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e=>{
+  if(e.code === 'Space' && !e.target.matches('input,textarea')){
+    e.preventDefault(); toggleListen();
+  }
+});
+document.getElementById('text-input').addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendInput(); }
+});
+
+// ── INIT ──
+updateDate();
+pingOllama();
+setInterval(pingOllama, 30000);
+
+// ── MODE SYSTEM ──
+let currentMode = 'chat';
+
+function setMode(mode){
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  const tab   = document.getElementById('tab-' + mode);
+  const panel = document.getElementById('mode-' + mode);
+  if(tab)   tab.classList.add('active');
+  if(panel) panel.classList.add('active');
+  currentMode = mode;
+  if(mode === 'chat'){
+    const inp = document.getElementById('text-input');
+    if(inp) setTimeout(() => inp.focus(), 50);
+  }
+}
+
+// ── VÓRTEX — META ADS LIVE DATA ──
+const VX_PROXY = 'https://meta-arena.vercel.app/api/meta';
+
+function vxEl(id){ return document.getElementById(id); }
+
+function vxSetKPI(id, val, cls){
+  const el = vxEl(id);
+  if(!el) return;
+  el.textContent = val;
+  el.className = 'vx-kpi-val' + (cls ? ' ' + cls : '');
+}
+
+function vxMsg(html){
+  const el = vxEl('vx-campaigns');
+  if(el) el.innerHTML = `<div class="vx-empty">${html}</div>`;
+}
+
+const vxCTR  = v => v >= 0.8 ? 'ok' : v >= 0.5 ? 'warn' : 'crit';
+const vxCPM  = v => v <= 55  ? 'ok' : v <= 80  ? 'warn' : 'crit';
+const vxFreq = v => v <= 2.5 ? 'ok' : v <= 3.5 ? 'warn' : 'crit';
+
+async function vortexFetch(){
+  const account = vxEl('vx-account')?.value;
+  const period  = vxEl('vx-period')?.value || 'last_7d';
+  const token   = vxEl('vx-token')?.value?.trim();
+
+  if(!token){ vxMsg('⚠ Insira o Access Token do Meta Ads para continuar'); return; }
+
+  ['vx-spend','vx-impr','vx-clicks','vx-ctr','vx-cpm','vx-cpc','vx-freq','vx-reach']
+    .forEach(id => vxSetKPI(id, '...', ''));
+  vxMsg('Buscando dados da API...');
+
+  const fields = 'spend,impressions,clicks,ctr,cpm,cpc,frequency,reach';
+
+  try {
+    const resp = await fetch(`${VX_PROXY}?path=${account}/insights&token=${encodeURIComponent(token)}&fields=${fields}&date_preset=${period}`, {
+      signal: AbortSignal.timeout(15000)
+    });
+    const data = await resp.json();
+
+    if(data.error){ vxMsg(`⚠ Meta API: ${data.error.message}`); return; }
+
+    const d = data.data?.[0];
+    if(d){
+      const spend = parseFloat(d.spend||0);
+      const ctr   = parseFloat(d.ctr||0);
+      const cpm   = parseFloat(d.cpm||0);
+      const cpc   = parseFloat(d.cpc||0);
+      const freq  = parseFloat(d.frequency||0);
+      const reach = parseInt(d.reach||0);
+      const impr  = parseInt(d.impressions||0);
+      const clicks= parseInt(d.clicks||0);
+
+      vxSetKPI('vx-spend',  'R$' + spend.toFixed(2).replace('.',','),  '');
+      vxSetKPI('vx-impr',   impr.toLocaleString('pt-BR'),               '');
+      vxSetKPI('vx-clicks', clicks.toLocaleString('pt-BR'),             '');
+      vxSetKPI('vx-ctr',    ctr.toFixed(2) + '%',                       vxCTR(ctr));
+      vxSetKPI('vx-cpm',    'R$' + cpm.toFixed(2).replace('.',','),    vxCPM(cpm));
+      vxSetKPI('vx-cpc',    'R$' + cpc.toFixed(2).replace('.',','),    '');
+      vxSetKPI('vx-freq',   freq.toFixed(1),                            vxFreq(freq));
+      vxSetKPI('vx-reach',  reach.toLocaleString('pt-BR'),              '');
+
+      // Store for diagnose
+      window._vxData = { account, period, spend, ctr, cpm, cpc, freq, reach, impr, clicks };
+    } else {
+      vxMsg('Sem dados para o período selecionado');
+    }
+
+    // Campaigns
+    const campFields = `name,status,insights.date_preset(${period}){spend,impressions,clicks,ctr,cpm,cpc,frequency,reach}`;
+    const cResp = await fetch(`${VX_PROXY}?path=${account}/campaigns&token=${encodeURIComponent(token)}&fields=${encodeURIComponent(campFields)}&limit=20`, {
+      signal: AbortSignal.timeout(15000)
+    });
+    const cData = await cResp.json();
+
+    if(cData.data?.length > 0){
+      vxRenderCampaigns(cData.data);
+    } else {
+      vxMsg('Nenhuma campanha encontrada. Conta ativa?');
+    }
+
+  } catch(e){
+    vxMsg('⚠ Erro: ' + (e.message || 'Verifique token e conexão'));
+  }
+}
+
+function vxRenderCampaigns(camps){
+  const grid = vxEl('vx-campaigns');
+  if(!grid) return;
+
+  grid.innerHTML = camps.map(c => {
+    const ins  = c.insights?.data?.[0];
+    const on   = c.status === 'ACTIVE';
+    const ctr  = ins ? parseFloat(ins.ctr||0)       : null;
+    const cpm  = ins ? parseFloat(ins.cpm||0)       : null;
+    const cpc  = ins ? parseFloat(ins.cpc||0)       : null;
+    const freq = ins ? parseFloat(ins.frequency||0) : null;
+    const spend= ins ? parseFloat(ins.spend||0)     : null;
+    const fmtR = (v,p) => v != null ? 'R$' + v.toFixed(p) : '—';
+    const fmtN = (v,p) => v != null ? v.toFixed(p)          : '—';
+    const cls  = (fn,v) => v != null ? fn(v)                : '';
+    const safe = s => s.replace(/'/g,"&#39;").replace(/"/g,'&quot;');
+
+    return `<div class="vx-card">
+      <div class="vx-card-accent ${on?'on':''}"></div>
+      <div class="vx-card-name" title="${safe(c.name)}">${safe(c.name)}</div>
+      <span class="vx-card-status ${on?'on':'off'}">${on?'ATIVA':'PAUSADA'}</span>
+      <div class="vx-card-metrics">
+        <div class="vx-m"><div class="vx-m-lbl">CTR</div><div class="vx-m-val ${cls(vxCTR,ctr)}">${fmtN(ctr,2)}${ctr!=null?'%':''}</div></div>
+        <div class="vx-m"><div class="vx-m-lbl">CPM</div><div class="vx-m-val ${cls(vxCPM,cpm)}">${fmtR(cpm,0)}</div></div>
+        <div class="vx-m"><div class="vx-m-lbl">Freq</div><div class="vx-m-val ${cls(vxFreq,freq)}">${fmtN(freq,1)}</div></div>
+        <div class="vx-m"><div class="vx-m-lbl">Spend</div><div class="vx-m-val">${fmtR(spend,0)}</div></div>
+        <div class="vx-m"><div class="vx-m-lbl">CPC</div><div class="vx-m-val">${fmtR(cpc,2)}</div></div>
+        <div class="vx-m"><div class="vx-m-lbl">Status</div><div class="vx-m-val" style="font-size:8px">${c.status||'—'}</div></div>
+      </div>
+      <button class="vx-diagnose-btn" onclick="vxDiagCampaign('${safe(c.name)}',${fmtN(ctr,2)},${fmtR(cpm,0).replace('R$','')},${fmtN(freq,1)},${fmtR(spend,0).replace('R$','')})">🔍 Diagnosticar com Alfred</button>
+    </div>`;
+  }).join('');
+}
+
+function vxDiagCampaign(name, ctr, cpm, freq, spend){
+  setMode('chat');
+  ask(`Diagnóstico pelos 8 Layers da campanha "${name}".\n\nDados:\n- CTR: ${ctr}%\n- CPM: R$${cpm}\n- Frequência: ${freq}\n- Spend: R$${spend}\n\nAnalisa cada um dos 8 layers (1 a 8), classifica 🟢🟡🔴, explica em 1 linha, e dá 1 ação se não estiver saudável.\n\nFinaliza:\n━━━ GARGALO PRINCIPAL ━━━\n━━━ AÇÃO IMEDIATA (próximas 48h) ━━━\n━━━ TESTE SUGERIDO ━━━`);
+}
+
+function vortexDiagnose(){
+  const d = window._vxData;
+  const accName = vxEl('vx-account')?.options[vxEl('vx-account')?.selectedIndex]?.text || 'conta';
+  if(!d){ setMode('chat'); ask('Diagnóstico da conta Meta Ads — analisa pelos 8 layers e pede os dados necessários.'); return; }
+
+  setMode('chat');
+  ask(`Diagnóstico completo pelos 8 Layers — ${accName} (período: ${d.period}).\n\nDados consolidados:\n- Spend: R$${d.spend?.toFixed(2)}\n- Impressões: ${d.impr?.toLocaleString('pt-BR')}\n- Cliques: ${d.clicks?.toLocaleString('pt-BR')}\n- CTR: ${d.ctr?.toFixed(2)}%\n- CPM: R$${d.cpm?.toFixed(2)}\n- CPC: R$${d.cpc?.toFixed(2)}\n- Frequência: ${d.freq?.toFixed(1)}\n- Alcance: ${d.reach?.toLocaleString('pt-BR')}\n\nAnalisa cada layer de 1 a 8, classifica 🟢🟡🔴, identifica o GARGALO PRINCIPAL e entrega plano: 🔴 Urgente | 🟡 Curto prazo | 🟢 Médio prazo.`);
+}
+
+// ── 8 LAYERS DIAGNOSIS ──
+function runLayersDiag(){
+  const g = id => document.getElementById(id)?.value || '';
+  const client   = g('ly-client');
+  const campaign = g('ly-campaign');
+  const ctr      = g('ly-ctr');
+  const cpm      = g('ly-cpm');
+  const cpc      = g('ly-cpc');
+  const cpa      = g('ly-cpa');
+  const freq     = g('ly-freq');
+  const spend    = g('ly-spend');
+  const conv     = g('ly-conv');
+  const days     = g('ly-days');
+  const status   = g('ly-status');
+  const obj      = g('ly-objective');
+
+  if(!ctr && !cpm && !spend){
+    alert('Preencha pelo menos CTR, CPM e Spend para gerar o diagnóstico.');
+    return;
+  }
+
+  const prompt = `Diagnóstico 8 Layers — ${client}${campaign ? ' · ' + campaign : ''}
+
+DADOS FORNECIDOS:
+- CTR: ${ctr||'—'}%  | CPM: R$${cpm||'—'}  | CPC: R$${cpc||'—'}
+- CPA: R$${cpa||'—'} | Frequência 7d: ${freq||'—'} | Spend total: R$${spend||'—'}
+- Conversões: ${conv||'—'} | Dias ativos: ${days||'—'}
+- Status: ${status} | Objetivo: ${obj}
+
+Analisa CADA UM dos 8 layers nessa ordem:
+
+Layer 1 — Público: frequência, saturação, overlap
+Layer 2 — Criativo: CTR, hook, fadiga criativa
+Layer 3 — Oferta: alinhamento anúncio vs landing page
+Layer 4 — Funil: taxa de conversão LP, jornada pós-clique
+Layer 5 — Orçamento: pacing, distribuição diária
+Layer 6 — Algoritmo: fase de aprendizado (PROTEGIDA — nunca pausar)
+Layer 7 — Competição: CPM vs histórico, sazonalidade, leilão
+Layer 8 — Dados: Pixel, CAPI, atribuição, conversões registradas
+
+Para cada layer: [Nº] Nome | 🟢/🟡/🔴 | Diagnóstico em 1-2 linhas | Ação se não saudável
+
+━━━ DIAGNÓSTICO FINAL ━━━
+GARGALO PRINCIPAL: [layer + explicação concisa]
+CLASSIFICAÇÃO GERAL: 🟢/🟡/🔴
+
+🔴 URGENTE (hoje):
+🟡 CURTO PRAZO (essa semana):
+🟢 MÉDIO PRAZO (próximo ciclo):
+
+PRÓXIMA REVISÃO: [quando e o que checar]`;
+
+  setMode('chat');
+  ask(prompt);
+}
+
+// ── CRIATIVOS TOOLS ──
+const crCfg = {
+  copy:      { lbl: 'Contexto — cliente, produto, público, objetivo e ticket', ph: 'ex: Nova Beach, plano beach tennis R$297/mês, mulheres 25-40 Campinas ativas, objetivo: matrícula' },
+  hook:      { lbl: 'Produto/Serviço e público-alvo', ph: 'ex: Arena Publicidade, kits corporativos licenciados Turma da Mônica, gestores de RH em empresas 50-500 funcionários' },
+  brief:     { lbl: 'Produto, objetivo do criativo e tom desejado', ph: 'ex: Nova Beach — aula experimental de beach tennis. Objetivo: agendamento. Tom: energético e descontraído' },
+  video:     { lbl: 'Produto, objetivo e duração (15s ou 30s)', ph: 'ex: Nova Beach, conversão para matrícula no plano mensal, 15s, estilo UGC câmera frontal' },
+  carrossel: { lbl: 'Tema e objetivo do carrossel', ph: 'ex: "5 erros que impedem sua empresa de crescer com brindes" para Arena Publicidade — objetivo: leads B2B' },
+  headline:  { lbl: 'Produto, público e plataforma de destino', ph: 'ex: Nova Beach, mulheres ativas 25-40 Campinas, Meta Ads feed e Google Search' },
+};
+
+const crPrompts = {
+  copy: ctx => `Modo: Copywriter de Anúncios. ${ctx}\n\nGera 3 variações de copy para Meta Ads com frameworks diferentes:\nVar 1 — PAS (Problema → Agitação → Solução): público que reconhece o problema\nVar 2 — AIDA (Atenção → Interesse → Desejo → Ação): awareness + conversão\nVar 3 — Prova Social + Oferta: para remarketing ou público morno\n\nPara cada variação:\n- Headline (gancho, máx 40 chars)\n- Texto primário (80-150 palavras, tuteando sempre)\n- CTA específico (não "Saiba mais" genérico)\n- Criativo sugerido (formato + o que mostrar visualmente)\n\nFinaliza: qual variação testar primeiro e com qual público.`,
+
+  hook: ctx => `Modo: Hook Generator. ${ctx}\n\nGera 5 hooks para parar o scroll:\n1. Dado/estatística surpreendente do nicho\n2. Pergunta direta que expõe uma dor real\n3. Afirmação ousada ou provocação\n4. Número + promessa específica\n5. Problema identificado ("Se você...")\n\nPara cada hook:\n- Versão texto (para feed, máx 125 chars visível)\n- Versão visual (o que mostrar nos primeiros 2s do vídeo para parar sem som)\n- Tom e público ideal`,
+
+  brief: ctx => `Modo: Brief Criativo (UGC). ${ctx}\n\nGera brief completo:\nOBJETIVO: [conversão/awareness/consideração]\nPRODUTO: [nome + 3 benefícios principais]\nPERSONA: [dor específica + desejo + contexto de vida]\n\nHOOK (primeiros 3s) — 2 opções:\nOpção A: [visual + o que dizer]\nOpção B: [alternativa de ângulo]\n\nDESENVOLVIMENTO (3-25s):\n[o que mostrar/falar em sequência, marcado por segundo]\n\nCTA (últimos 5s):\n[ação + plataforma de destino]\n\nTOM: [descontraído/educativo/antes-depois/demonstração]\nNÃO FAZER: [restrições, menções proibidas pelo Meta]\nENTREGÁVEIS: formato, resolução, duração, legenda obrigatória (80% assiste sem som)`,
+
+  video: ctx => `Modo: Roteiro de Vídeo 15-30s para Meta Ads. ${ctx}\n\nROTEIRO COMPLETO:\nCena 1 — HOOK VISUAL (0-3s): parar o scroll SEM SOM\n[Visual: / Áudio/Texto na tela:]\n\nCena 2 — PROBLEMA AMPLIFICADO (3-8s):\n[Visual: / Fala:]\n\nCena 3 — SOLUÇÃO EM AÇÃO (8-18s):\n[Visual: / Fala:]\n\nCena 4 — PROVA/RESULTADO (18-25s):\n[Visual: / Fala:]\n\nCena 5 — CTA DIRETO (25-30s):\n[Visual: / Fala: / CTA na tela:]\n\nTRILHA SUGERIDA:\nLEGENDA: sim (obrigatório — 80% assiste sem som)\nESTILO: UGC ou produzido? Iluminação, cenário, look ideal.`,
+
+  carrossel: ctx => `Modo: Estrutura de Carrossel para Meta Ads. ${ctx}\n\nSlide 1 — CAPA (para o scroll):\nTítulo: [máx 6 palavras, impacto imediato]\nVisual: [o que mostrar, cores, mood]\n\nSlides 2-4 — CONTEÚDO DE VALOR:\nSlide 2: [ponto 1 — título curto + 1-2 linhas de copy]\nSlide 3: [ponto 2]\nSlide 4: [ponto 3]\n\nSlide 5 — PROVA/RESULTADO:\n[depoimento, número, caso real]\n\nSlide 6 — CTA:\n[ação direta + link/contato]\n\nDireção de design: paleta de cores, fonte, estilo visual coerente com a marca.`,
+
+  headline: ctx => `Modo: Headlines de Alta Conversão. ${ctx}\n\nGera 10 headlines usando esses frameworks:\n1-2. Transformação: "De [situação atual] para [desejada] em [tempo]"\n3-4. Curiosidade: "O [método/erro/motivo] que [resultado] sem [objeção]"\n5-6. Número: "[X] [razões/passos/erros/segredos] para [resultado específico]"\n7-8. Provocação: "Pare de [comportamento] se quer [resultado]"\n9-10. Pergunta direta: "Você está cometendo esse erro em [tema]?"\n\nPara cada headline:\n- Versão desktop (sem limite)\n- Versão mobile (máx 50 chars)\n- Onde usar: feed, stories, Google Ads, LP`,
+};
+
+function crMode(type){
+  const area = vxEl('cr-form-area');
+  if(!area) return;
+  const cfg = crCfg[type] || { lbl:'Contexto', ph:'' };
+  area.innerHTML = `
+    <div class="cr-form">
+      <div class="cr-form-title">${type.toUpperCase()} GENERATOR</div>
+      <div class="ly-field">
+        <label class="ly-label">${cfg.lbl}</label>
+        <textarea class="cr-textarea" id="cr-ctx" placeholder="${cfg.ph}"></textarea>
+      </div>
+      <button class="cr-submit" onclick="crGenerate('${type}')">Gerar com Alfred →</button>
+    </div>`;
+  area.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function crGenerate(type){
+  const ctx = vxEl('cr-ctx')?.value?.trim() || '';
+  const fn  = crPrompts[type];
+  if(!fn) return;
+  setMode('chat');
+  ask(fn(ctx ? 'Contexto: ' + ctx + '.' : ''));
+}
+
+// ── TRACKER ──
+const TK_PROXY = location.protocol === 'https:' ? '/api/fetch-site' : 'https://meta-arena.vercel.app/api/fetch-site';
+let tkLastHTML = '';
+let tkLastURL  = '';
+
+function trackerPaste(){
+  const area = vxEl('tk-paste-area');
+  if(area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+
+async function trackerFetch(){
+  const url = vxEl('tk-url')?.value?.trim();
+  if(!url || !url.startsWith('http')){ alert('URL inválida. Use https://...'); return; }
+  tkLastURL = url;
+  const score = vxEl('tk-score-area');
+  if(score) score.style.display = 'none';
+  try {
+    const resp = await fetch(`${TK_PROXY}?url=${encodeURIComponent(url)}`, {
+      signal: AbortSignal.timeout(12000)
+    });
+    if(!resp.ok) throw new Error('Proxy offline ou URL inacessível');
+    const text = await resp.text();
+    tkLastHTML = text;
+    trackerAnalyzeHTML(text);
+  } catch(e) {
+    vxEl('tk-paste-area').style.display = 'block';
+    alert('Não foi possível buscar a URL automaticamente: ' + e.message + '\n\nCole o HTML manualmente.');
+  }
+}
+
+function trackerAnalyzeHTML(html){
+  if(!html || html.length < 100){ alert('HTML muito curto ou vazio.'); return; }
+  tkLastHTML = html;
+
+  const checks = [];
+  let score = 0;
+
+  // Meta Pixel
+  const pixelMatch = html.match(/fbq\s*\(\s*['"]init['"]\s*,\s*['"](\d+)['"]/g);
+  const pixelCount = pixelMatch ? pixelMatch.length : 0;
+  if(pixelCount === 1){
+    checks.push({s:'ok', icon:'✅', title:'Meta Pixel', text:'Pixel encontrado e único. ID detectado.'});
+    score += 25;
+  } else if(pixelCount > 1){
+    checks.push({s:'warn', icon:'⚠️', title:'Meta Pixel DUPLICADO', text:`${pixelCount} inicializações de pixel encontradas. Isso distorce a atribuição e pode inflar eventos.`});
+    score += 10;
+  } else {
+    checks.push({s:'err', icon:'🔴', title:'Meta Pixel AUSENTE', text:'Nenhuma chamada fbq("init",...) encontrada. Conversões não estão sendo rastreadas.'});
+  }
+
+  // fbq events
+  const events = html.match(/fbq\s*\(\s*['"]track['"]\s*,\s*['"][^'"]+['"]/g) || [];
+  const uniqueEvents = [...new Set(events.map(e => e.match(/['"][^'"]+['"]\s*$/)?.[0]?.replace(/['"]/g,'') || e))];
+  if(events.length > 0){
+    checks.push({s:'ok', icon:'✅', title:`Eventos Meta (${events.length})`, text:`Eventos detectados: ${uniqueEvents.join(', ')}`});
+    score += 15;
+  } else if(pixelCount > 0){
+    checks.push({s:'warn', icon:'⚠️', title:'Sem eventos trackados', text:'Pixel presente mas sem eventos fbq("track",...). Apenas PageView está sendo registrado.'});
+    score += 5;
+  }
+
+  // CAPI indicators
+  const hasCAPI = html.includes('capig') || html.includes('capi') || html.includes('conversions_api') || html.includes('server-side') || html.includes('fbclid') || html.includes('_fbc');
+  if(hasCAPI){
+    checks.push({s:'ok', icon:'✅', title:'CAPI / Server-Side', text:'Indicadores de Conversions API detectados. Atribuição reforçada.'});
+    score += 20;
+  } else {
+    checks.push({s:'warn', icon:'⚠️', title:'CAPI não detectado', text:'Nenhum indicador de Conversions API encontrado. Recomendado para atribuição iOS 14.5+.'});
+  }
+
+  // GA4
+  const ga4Match = html.match(/G-[A-Z0-9]{8,}/g);
+  if(ga4Match){
+    checks.push({s:'ok', icon:'✅', title:'Google Analytics 4', text:`GA4 detectado: ${[...new Set(ga4Match)].join(', ')}`});
+    score += 15;
+  } else if(html.match(/UA-\d{4,}-\d/)){
+    checks.push({s:'warn', icon:'⚠️', title:'GA4 Ausente — UA legado detectado', text:'Universal Analytics (UA) foi descontinuado. Migre para GA4 imediatamente.'});
+  } else {
+    checks.push({s:'info', icon:'ℹ️', title:'Google Analytics', text:'Nenhuma tag GA detectada na página.'});
+  }
+
+  // GTM
+  const gtm = html.match(/GTM-[A-Z0-9]{4,}/g);
+  if(gtm){
+    checks.push({s:'ok', icon:'✅', title:'Google Tag Manager', text:`GTM detectado: ${[...new Set(gtm)].join(', ')}. Facilita gerenciamento de tags.`});
+    score += 10;
+  }
+
+  // Noscript pixel
+  const hasNoscript = html.includes('<noscript>') && html.includes('facebook.com/tr');
+  if(hasNoscript){
+    checks.push({s:'ok', icon:'✅', title:'Pixel noscript', text:'Tag noscript do Meta Pixel presente. Garante tracking de usuários sem JS.'});
+    score += 5;
+  }
+
+  // fbclid / UTMs
+  const hasUTM = html.includes('utm_source') || html.includes('utm_campaign');
+  if(hasUTM){
+    checks.push({s:'info', icon:'ℹ️', title:'UTMs detectados', text:'Parâmetros UTM encontrados no HTML. Boa prática para atribuição.'});
+    score += 5;
+  }
+
+  score = Math.min(score, 100);
+
+  // Render
+  const sa = vxEl('tk-score-area');
+  sa.style.display = 'block';
+  const sn = vxEl('tk-score-num');
+  const sf = vxEl('tk-score-fill');
+  const ss = vxEl('tk-score-status');
+
+  sn.textContent = score;
+  sn.style.color = score >= 70 ? '#00c97a' : score >= 40 ? '#f0c040' : '#ff6b00';
+  sf.style.width  = score + '%';
+  sf.style.background = score >= 70 ? 'linear-gradient(90deg,#00c97a40,#00c97a90)' :
+                         score >= 40 ? 'linear-gradient(90deg,#f0c04040,#f0c04090)' :
+                                       'linear-gradient(90deg,#ff6b0040,#ff6b0090)';
+  ss.textContent = score >= 70 ? '🟢 Tracking saudável' : score >= 40 ? '🟡 Melhorias necessárias' : '🔴 Tracking crítico';
+
+  const list = vxEl('tk-checks');
+  list.innerHTML = checks.map(c => `
+    <div class="tk-check ${c.s}">
+      <div class="tk-check-icon">${c.icon}</div>
+      <div class="tk-check-text"><strong>${c.title}</strong>${c.text}</div>
+    </div>`).join('');
+}
+
+function trackerDiagnoseAI(){
+  const url = tkLastURL || (vxEl('tk-url')?.value?.trim() || 'a página analisada');
+  const score = vxEl('tk-score-num')?.textContent || '—';
+  const checks = [...document.querySelectorAll('.tk-check')].map(el => {
+    const icon = el.querySelector('.tk-check-icon')?.textContent || '';
+    const title = el.querySelector('strong')?.textContent || '';
+    const text = el.querySelector('.tk-check-text')?.textContent?.replace(title,'')?.trim() || '';
+    return `${icon} ${title}: ${text}`;
+  }).join('\n');
+
+  setMode('chat');
+  ask(`Diagnóstico de tracking da URL: ${url}\nHealth Score: ${score}/100\n\nResultados da auditoria:\n${checks}\n\nBaseado nesses dados:\n1. Qual é o impacto estimado nos resultados das campanhas Meta Ads?\n2. Quais são as 3 correções prioritárias, do mais urgente ao menos urgente?\n3. Como implementar cada correção (passos práticos)?\n4. Qual seria o health score esperado após as correções?`);
+}
+
+// ── PROTECTOR ──
+const PT_DEFAULT_RULES = [
+  { metric:'ctr', condition:'lt', threshold:'0.5', action:'notify', label:'CTR abaixo de 0.5%' },
+  { metric:'frequency', condition:'gt', threshold:'3.5', action:'pause', label:'Frequência acima de 3.5' },
+  { metric:'cpm', condition:'gt', threshold:'80', action:'notify', label:'CPM acima de R$80' },
+];
+let ptRules = [...PT_DEFAULT_RULES];
+let ptLog   = [];
+
+function ptRenderRules(){
+  const cont = vxEl('pt-rules');
+  if(!cont) return;
+  if(ptRules.length === 0){ cont.innerHTML = '<div class="vx-empty" style="font-size:9px">Nenhuma regra. Clique em + Adicionar.</div>'; return; }
+
+  cont.innerHTML = ptRules.map((r, i) => `
+    <div class="pt-rule">
+      <select onchange="ptRules[${i}].metric=this.value">
+        ${['ctr','cpm','cpc','frequency','spend'].map(m=>`<option value="${m}" ${r.metric===m?'selected':''}>${m.toUpperCase()}</option>`).join('')}
+      </select>
+      <select onchange="ptRules[${i}].condition=this.value">
+        <option value="gt" ${r.condition==='gt'?'selected':''}>maior que</option>
+        <option value="lt" ${r.condition==='lt'?'selected':''}>menor que</option>
+      </select>
+      <input type="number" value="${r.threshold}" step="0.01" onchange="ptRules[${i}].threshold=this.value" style="width:70px">
+      <select onchange="ptRules[${i}].action=this.value">
+        <option value="notify" ${r.action==='notify'?'selected':''}>Notificar</option>
+        <option value="pause"  ${r.action==='pause'?'selected':''}>Pausar campanha</option>
+        <option value="scale"  ${r.action==='scale'?'selected':''}>Escalar 20%</option>
+      </select>
+      <button class="pt-rule-del" onclick="ptDeleteRule(${i})">✕</button>
+    </div>`).join('');
+}
+
+function ptAddRule(){
+  ptRules.push({ metric:'ctr', condition:'lt', threshold:'0.8', action:'notify' });
+  ptRenderRules();
+}
+
+function ptDeleteRule(i){ ptRules.splice(i,1); ptRenderRules(); }
+
+function ptAddLog(msg, type='info'){
+  const now = new Date().toTimeString().slice(0,8);
+  const color = type==='ok'?'#00c97a' : type==='warn'?'#f0c040' : type==='err'?'#ff6b00' : '#00d4ff40';
+  ptLog.unshift(`<span style="color:${color}">[${now}] ${msg}</span>`);
+  if(ptLog.length > 50) ptLog.pop();
+  const el = vxEl('pt-log');
+  if(el) el.innerHTML = ptLog.join('<br>');
+}
+
+async function protectorRun(){
+  const account = vxEl('pt-account')?.value;
+  const token   = vxEl('pt-token')?.value?.trim();
+  const safe    = vxEl('pt-safemode')?.checked;
+
+  if(!token){ alert('Insira o Access Token do Meta Ads.'); return; }
+
+  ptAddLog('Iniciando verificação de regras...', 'info');
+  const fields = 'spend,ctr,cpm,cpc,frequency';
+  const period = 'last_7d';
+
+  try {
+    const campFields = `name,status,insights.date_preset(${period}){${fields}}`;
+    const resp = await fetch(`${VX_PROXY}?path=${account}/campaigns&token=${encodeURIComponent(token)}&fields=${encodeURIComponent(campFields)}&limit=30`, {
+      signal: AbortSignal.timeout(15000)
+    });
+    const data = await resp.json();
+    if(data.error){ ptAddLog('Erro Meta API: ' + data.error.message, 'err'); return; }
+
+    if(!data.data?.length){ ptAddLog('Nenhuma campanha encontrada.', 'warn'); return; }
+
+    let triggered = 0;
+    for(const camp of data.data){
+      const ins = camp.insights?.data?.[0];
+      if(!ins) continue;
+      const metrics = {
+        ctr:       parseFloat(ins.ctr||0),
+        cpm:       parseFloat(ins.cpm||0),
+        cpc:       parseFloat(ins.cpc||0),
+        frequency: parseFloat(ins.frequency||0),
+        spend:     parseFloat(ins.spend||0),
+      };
+
+      for(const rule of ptRules){
+        const val   = metrics[rule.metric] ?? 0;
+        const thr   = parseFloat(rule.threshold);
+        const fired = (rule.condition==='gt' && val>thr) || (rule.condition==='lt' && val<thr);
+        if(!fired) continue;
+
+        triggered++;
+        const desc = `"${camp.name}" | ${rule.metric.toUpperCase()}=${val.toFixed(2)} ${rule.condition==='gt'?'>':'<'} ${thr}`;
+
+        if(rule.action === 'notify'){
+          ptAddLog(`🔔 ALERTA: ${desc}`, 'warn');
+        } else if(rule.action === 'pause'){
+          ptAddLog(`${safe?'[SIMULADO] ':''}⏸ PAUSAR: ${desc}`, safe?'warn':'err');
+          if(!safe && camp.status==='ACTIVE'){
+            await fetch(`${VX_PROXY}?path=${camp.id}&token=${encodeURIComponent(token)}`, {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ status:'PAUSED' })
+            });
+          }
+        } else if(rule.action === 'scale'){
+          ptAddLog(`${safe?'[SIMULADO] ':''}📈 ESCALAR: ${desc}`, safe?'info':'ok');
+        }
+      }
+    }
+
+    if(triggered === 0){
+      ptAddLog(`✅ Todas as ${data.data.length} campanhas dentro dos limites definidos.`, 'ok');
+    } else {
+      ptAddLog(`Verificação concluída — ${triggered} ocorrência(s) encontrada(s).`, triggered>0?'warn':'ok');
+    }
+  } catch(e){
+    ptAddLog('Erro de conexão: ' + e.message, 'err');
+  }
+}
+
+// Init Protector rules
+ptRenderRules();
+
+// ── DEMOGRAPHICS ──
+async function demographicsFetch(){
+  const account = vxEl('dm-account')?.value;
+  const period  = vxEl('dm-period')?.value || 'last_7d';
+  const token   = vxEl('dm-token')?.value?.trim();
+
+  if(!token){ alert('Insira o Access Token do Meta Ads.'); return; }
+
+  vxEl('dm-age-chart').innerHTML = '<div class="vx-empty">Buscando...</div>';
+  vxEl('dm-gender-chart').innerHTML = '<div class="vx-empty">Buscando...</div>';
+  vxEl('dm-top-segments').innerHTML = '<div class="vx-empty">Buscando...</div>';
+
+  const fields = 'spend,impressions,clicks,ctr,cpm';
+
+  try {
+    // Age breakdown
+    const ageResp = await fetch(
+      `${VX_PROXY}?path=${account}/insights&token=${encodeURIComponent(token)}&fields=${fields}&date_preset=${period}&breakdowns=age&limit=20`,
+      { signal: AbortSignal.timeout(15000) }
+    );
+    const ageData = await ageResp.json();
+
+    // Gender breakdown
+    const gndResp = await fetch(
+      `${VX_PROXY}?path=${account}/insights&token=${encodeURIComponent(token)}&fields=${fields}&date_preset=${period}&breakdowns=gender&limit=10`,
+      { signal: AbortSignal.timeout(15000) }
+    );
+    const gndData = await gndResp.json();
+
+    if(ageData.error){ vxEl('dm-age-chart').innerHTML=`<div class="vx-empty">Erro: ${ageData.error.message}</div>`; }
+    else { dmRenderAge(ageData.data||[]); }
+
+    if(gndData.error){ vxEl('dm-gender-chart').innerHTML=`<div class="vx-empty">Erro: ${gndData.error.message}</div>`; }
+    else { dmRenderGender(gndData.data||[]); }
+
+    window._dmData = { age: ageData.data||[], gender: gndData.data||[], period };
+
+  } catch(e){
+    vxEl('dm-age-chart').innerHTML = `<div class="vx-empty">Erro: ${e.message}</div>`;
+  }
+}
+
+function dmRenderAge(rows){
+  if(!rows.length){ vxEl('dm-age-chart').innerHTML='<div class="vx-empty">Sem dados</div>'; return; }
+  const maxSpend = Math.max(...rows.map(r=>parseFloat(r.spend||0)), 0.01);
+  const sorted = [...rows].sort((a,b)=>parseFloat(b.spend)-parseFloat(a.spend));
+
+  vxEl('dm-age-chart').innerHTML = sorted.map(r=>{
+    const spend = parseFloat(r.spend||0);
+    const pct   = (spend/maxSpend*100).toFixed(1);
+    const ctr   = parseFloat(r.ctr||0).toFixed(2);
+    return `
+      <div class="dm-bar-row">
+        <div class="dm-bar-label">${r.age||'—'}</div>
+        <div class="dm-bar-track"><div class="dm-bar-fill" style="width:${pct}%"></div></div>
+        <div class="dm-bar-val">R$${spend.toFixed(0)}</div>
+      </div>`;
+  }).join('') + `<div style="margin-top:8px;font-size:8.5px;color:#00d4ff25">CTR por faixa: ${sorted.map(r=>r.age+': '+parseFloat(r.ctr||0).toFixed(2)+'%').join(' · ')}</div>`;
+
+  // Top segments
+  const top = sorted.slice(0,3);
+  vxEl('dm-top-segments').innerHTML = top.map((r,i)=>`
+    <div class="dm-insight">
+      <strong style="color:#00d4ff60">${['🥇','🥈','🥉'][i]} ${r.age}</strong> —
+      Spend: R$${parseFloat(r.spend||0).toFixed(2)} · CTR: ${parseFloat(r.ctr||0).toFixed(2)}% · CPM: R$${parseFloat(r.cpm||0).toFixed(2)}
+    </div>`).join('');
+}
+
+function dmRenderGender(rows){
+  if(!rows.length){ vxEl('dm-gender-chart').innerHTML='<div class="vx-empty">Sem dados</div>'; return; }
+  const maxSpend = Math.max(...rows.map(r=>parseFloat(r.spend||0)), 0.01);
+  const labels = { male:'Masculino', female:'Feminino', unknown:'Desconhecido' };
+
+  vxEl('dm-gender-chart').innerHTML = rows.map(r=>{
+    const spend = parseFloat(r.spend||0);
+    const pct   = (spend/maxSpend*100).toFixed(1);
+    const isFem = r.gender === 'female';
+    return `
+      <div class="dm-bar-row">
+        <div class="dm-bar-label">${labels[r.gender]||r.gender}</div>
+        <div class="dm-bar-track"><div class="dm-bar-fill ${isFem?'female':''}" style="width:${pct}%"></div></div>
+        <div class="dm-bar-val">R$${spend.toFixed(0)}</div>
+      </div>`;
+  }).join('');
+}
+
+function demographicsDiagnose(){
+  const d = window._dmData;
+  const accName = vxEl('dm-account')?.options[vxEl('dm-account')?.selectedIndex]?.text || 'conta';
+  if(!d){ setMode('chat'); ask('Análise demográfica — sem dados carregados. Quais segmentos demográficos devo priorizar para campanha de conversão no Meta Ads?'); return; }
+
+  const ageStr = d.age.map(r=>`${r.age}: spend R$${parseFloat(r.spend).toFixed(2)}, CTR ${parseFloat(r.ctr).toFixed(2)}%, CPM R$${parseFloat(r.cpm).toFixed(2)}`).join('\n');
+  const gndStr = d.gender.map(r=>`${r.gender}: spend R$${parseFloat(r.spend).toFixed(2)}, CTR ${parseFloat(r.ctr).toFixed(2)}%`).join('\n');
+
+  setMode('chat');
+  ask(`Análise demográfica detalhada — ${accName} (${d.period}):\n\nPor idade:\n${ageStr}\n\nPor gênero:\n${gndStr}\n\nAnalisa esses dados e me diz:\n1. Qual segmento está performando melhor e por quê?\n2. Qual segmento está desperdiçando budget?\n3. Devo excluir alguma faixa etária?\n4. Como ajustar a segmentação nos conjuntos de anúncios?\n5. Sugestão de público otimizado para o próximo período.`);
+}
+
+// ── UTM BUILDER ──
+let utmLibrary = JSON.parse(localStorage.getItem('alfred_utm_lib') || '[]');
+
+function utmBuild(){
+  const url      = vxEl('utm-url')?.value?.trim() || '';
+  const source   = vxEl('utm-source')?.value?.trim() || '';
+  const medium   = vxEl('utm-medium')?.value?.trim() || '';
+  const campaign = vxEl('utm-campaign')?.value?.trim() || '';
+  const content  = vxEl('utm-content')?.value?.trim() || '';
+  const term     = vxEl('utm-term')?.value?.trim() || '';
+
+  if(!url){ vxEl('utm-output').textContent = 'Insira a URL base primeiro.'; return; }
+
+  const params = new URLSearchParams();
+  if(source)   params.set('utm_source',   source.toLowerCase().replace(/\s+/g,'_'));
+  if(medium)   params.set('utm_medium',   medium.toLowerCase().replace(/\s+/g,'_'));
+  if(campaign) params.set('utm_campaign', campaign.toLowerCase().replace(/\s+/g,'_'));
+  if(content)  params.set('utm_content',  content.toLowerCase().replace(/\s+/g,'_'));
+  if(term)     params.set('utm_term',     term.toLowerCase().replace(/\s+/g,'_'));
+
+  const separator = url.includes('?') ? '&' : '?';
+  const full = params.toString() ? url + separator + params.toString() : url;
+  vxEl('utm-output').textContent = full;
+}
+
+function utmCopy(){
+  const txt = vxEl('utm-output')?.textContent || '';
+  if(!txt || txt.includes('Preencha')) return;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const el = vxEl('utm-output');
+    const orig = el.textContent;
+    el.textContent = '✅ Copiado!';
+    el.style.color = '#00c97a';
+    setTimeout(()=>{ el.textContent = orig; el.style.color = ''; }, 1500);
+  });
+}
+
+function utmSave(){
+  const txt = vxEl('utm-output')?.textContent || '';
+  if(!txt || txt.includes('Preencha')){ alert('Gere uma URL primeiro.'); return; }
+  const label = prompt('Nome/descrição para este link:', vxEl('utm-campaign')?.value || '');
+  if(label === null) return;
+  utmLibrary.unshift({ label: label || txt.slice(0,40), url: txt, ts: Date.now() });
+  if(utmLibrary.length > 50) utmLibrary.pop();
+  localStorage.setItem('alfred_utm_lib', JSON.stringify(utmLibrary));
+  utmRenderLibrary();
+}
+
+function utmDeleteItem(i){
+  utmLibrary.splice(i,1);
+  localStorage.setItem('alfred_utm_lib', JSON.stringify(utmLibrary));
+  utmRenderLibrary();
+}
+
+function utmRenderLibrary(){
+  const lib = vxEl('utm-library');
+  if(!lib) return;
+  if(!utmLibrary.length){ lib.innerHTML='<div class="vx-empty" style="font-size:9px">Nenhum link salvo ainda</div>'; return; }
+  lib.innerHTML = utmLibrary.map((item,i)=>`
+    <div class="utm-lib-item">
+      <div style="overflow:hidden">
+        <div style="color:#00d4ff55;font-size:9px;margin-bottom:2px">${item.label}</div>
+        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:500px;cursor:pointer" onclick="navigator.clipboard.writeText('${item.url.replace(/'/g,"\\'")}').then(()=>alert('Copiado!'))">${item.url}</div>
+      </div>
+      <button class="utm-lib-del" onclick="utmDeleteItem(${i})">✕</button>
+    </div>`).join('');
+}
+
+function utmTemplate(source, medium){
+  const fld = (id,v) => { const el=vxEl(id); if(el) el.value=v; };
+  fld('utm-source', source);
+  fld('utm-medium', medium);
+  utmBuild();
+}
+
+// Auto-build on input change
+['utm-url','utm-source','utm-medium','utm-campaign','utm-content','utm-term'].forEach(id=>{
+  const el = vxEl(id);
+  if(el) el.addEventListener('input', utmBuild);
+});
+
+utmRenderLibrary();
+</script>
+</body>
+</html>
