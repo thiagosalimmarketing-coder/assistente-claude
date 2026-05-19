@@ -2155,16 +2155,14 @@ async function pingOllama(){
       if(document.getElementById('hud-model')) document.getElementById('hud-model').textContent = 'QWEN14B';
     } else throw new Error('not ok');
   } catch{
-    const isCloud = location.protocol === 'https:';
-    document.getElementById('top-status').textContent = isCloud ? 'Online · Claude API · claude-sonnet-4-6' : 'Ollama OFFLINE';
-    document.getElementById('status-bottom').textContent = isCloud ? 'Alfred · Cloud Mode · Claude API · pronto' : 'Execute: ollama serve';
+    document.getElementById('top-status').textContent = 'Ollama OFFLINE — execute ALFRED-OLLAMA-CORS.bat';
+    document.getElementById('status-bottom').textContent = 'Execute: ollama serve';
     const el = document.getElementById('ollama-r');
-    if(el){ el.textContent = isCloud ? 'Engine: Claude API' : 'Engine: OFFLINE'; if(!isCloud) el.style.color='#ff6b0060'; }
+    if(el){ el.textContent = 'Engine: OFFLINE'; el.style.color='#ff6b0060'; }
     if(document.getElementById('hud-engine')){
-      document.getElementById('hud-engine').textContent = isCloud ? 'CLAUDE' : 'OFFLINE';
-      if(!isCloud) document.getElementById('hud-engine').style.color = '#ff6b0080';
+      document.getElementById('hud-engine').textContent = 'OFFLINE';
+      document.getElementById('hud-engine').style.color = '#ff6b0080';
     }
-    if(document.getElementById('hud-model') && isCloud) document.getElementById('hud-model').textContent = 'SONNET';
   }
 }
 
