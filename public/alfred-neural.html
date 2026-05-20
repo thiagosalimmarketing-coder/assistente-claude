@@ -802,6 +802,121 @@ body.speaking  .wave span{animation-duration:.15s!important;background:#ff6b00;b
 .ca-dot.active{background:#00d4ff50;width:14px;border-radius:2px}
 .ca-copy-all-area{width:100%;max-width:500px;background:rgba(0,8,19,.6);border:1px solid #00d4ff15;border-radius:3px;padding:12px;font-size:9.5px;font-family:'Courier New',monospace;color:#00d4ff40;white-space:pre-wrap;max-height:200px;overflow-y:auto;line-height:1.7}
 .ca-ai-status{font-size:9px;font-family:'Courier New',monospace;color:#f0c040;animation:pulse 1.5s infinite}
+
+/* ── SOS ── */
+.sos-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.sos-panel::-webkit-scrollbar{width:2px}.sos-panel::-webkit-scrollbar-thumb{background:#ff6b0020}
+.sos-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #ff6b0025;border-radius:3px;background:#ff6b0008}
+.sos-hdr-icon{font-size:20px}
+.sos-hdr h2{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#ff6b00;margin:0}
+.sos-hdr p{font-size:8.5px;color:#ff6b0060;margin:2px 0 0;letter-spacing:.5px}
+.sos-card{border:1px solid #00d4ff15;border-radius:3px;overflow:hidden;transition:border-color .2s}
+.sos-card.crit{border-color:#ff6b0030}
+.sos-card.warn{border-color:#f0c04030}
+.sos-card-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:rgba(0,5,14,.4)}
+.sos-card-hdr:hover{background:rgba(0,212,255,.03)}
+.sos-card-icon{font-size:16px;flex-shrink:0}
+.sos-card-title{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:#00d4ff80;font-weight:600}
+.sos-card-sym{font-size:8px;color:#00d4ff35;margin-top:2px;letter-spacing:.3px}
+.sos-badge{padding:2px 7px;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;margin-left:auto;flex-shrink:0}
+.sos-badge.crit{background:#ff6b0015;color:#ff6b00;border:1px solid #ff6b0030}
+.sos-badge.warn{background:#f0c04015;color:#f0c040;border:1px solid #f0c04030}
+.sos-card-body{display:none;padding:12px 14px;border-top:1px solid #00d4ff10;background:rgba(0,3,10,.6)}
+.sos-card-body.open{display:block}
+.sos-section-lbl{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:#00d4ff30;margin-bottom:7px;margin-top:10px}
+.sos-check-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;cursor:pointer;transition:opacity .2s}
+.sos-check-item.done{opacity:.4}
+.sos-check-box{width:14px;height:14px;border:1px solid #00d4ff30;border-radius:2px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.sos-check-item.done .sos-check-box{background:#00c97a30;border-color:#00c97a60}
+.sos-check-item.done .sos-check-box::after{content:'✓';font-size:9px;color:#00c97a}
+.sos-check-txt{font-size:8.5px;color:#00d4ff60;line-height:1.5}
+.sos-check-item.done .sos-check-txt{text-decoration:line-through;color:#00d4ff25}
+.sos-fix-item{display:flex;align-items:flex-start;gap:7px;padding:5px 8px;background:#00d4ff06;border-radius:2px;margin-bottom:4px}
+.sos-fix-arr{color:#00d4ff40;font-size:10px;flex-shrink:0;margin-top:1px}
+.sos-fix-txt{font-size:8.5px;color:#00d4ff70;line-height:1.5}
+.sos-ai-btn{width:100%;padding:7px;background:transparent;border:1px solid #ff6b0040;color:#ff6b00;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;margin-top:10px}
+.sos-ai-btn:hover{background:#ff6b0012;border-color:#ff6b0080}
+.sos-chevron{color:#00d4ff25;font-size:10px;margin-left:auto;flex-shrink:0;transition:transform .2s}
+.sos-card.open .sos-chevron{transform:rotate(90deg)}
+.sos-tip{display:flex;gap:9px;padding:10px 12px;border:1px solid #00d4ff15;border-radius:3px;background:#00d4ff05;font-size:8.5px;color:#00d4ff40;line-height:1.6}
+
+/* ── BRIEF ── */
+.bf-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.bf-panel::-webkit-scrollbar{width:2px}.bf-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.bf-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bf-label{font-size:7.5px;letter-spacing:1.8px;text-transform:uppercase;color:#00d4ff35;display:block;margin-bottom:4px}
+.bf-input,.bf-select,.bf-textarea{width:100%;background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;padding:6px 9px;font-size:9.5px;font-family:'Courier New',monospace;border-radius:2px;outline:none;resize:vertical;box-sizing:border-box}
+.bf-input:focus,.bf-select:focus,.bf-textarea:focus{border-color:#00d4ff50}
+.bf-select option{background:#00050e}
+.bf-btn{padding:7px 18px;background:transparent;border:1px solid #00d4ff40;color:#00d4ff80;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.bf-btn:hover{background:#00d4ff12;border-color:#00d4ff80;color:#00d4ff}
+.bf-btn-primary{border-color:#00d4ff70;color:#00d4ff}
+.bf-result{background:rgba(0,8,19,.6);border:1px solid #00d4ff18;border-radius:3px;padding:14px;font-size:9px;font-family:'Courier New',monospace;color:#00d4ff70;white-space:pre-wrap;line-height:1.8;max-height:380px;overflow-y:auto}
+
+/* ── SOCIAL INBOX ── */
+.si-panel{flex:1;display:flex;overflow:hidden}
+.si-posts-col{width:240px;flex-shrink:0;border-right:1px solid #00d4ff10;display:flex;flex-direction:column;overflow:hidden}
+.si-posts-hdr{padding:10px 12px;border-bottom:1px solid #00d4ff10;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#00d4ff35;display:flex;align-items:center;gap:8px}
+.si-posts-list{flex:1;overflow-y:auto;padding:6px}
+.si-posts-list::-webkit-scrollbar{width:2px}.si-posts-list::-webkit-scrollbar-thumb{background:#00d4ff15}
+.si-post-item{padding:8px 10px;border:1px solid transparent;border-radius:3px;cursor:pointer;margin-bottom:4px;transition:all .2s}
+.si-post-item:hover{border-color:#00d4ff20;background:#00d4ff05}
+.si-post-item.active{border-color:#00d4ff35;background:#00d4ff08}
+.si-post-thumb{width:100%;aspect-ratio:1;border-radius:2px;background:#00d4ff08;overflow:hidden;margin-bottom:6px}
+.si-post-thumb img{width:100%;height:100%;object-fit:cover;border-radius:2px}
+.si-post-caption{font-size:8px;color:#00d4ff50;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.si-post-meta{font-size:7.5px;color:#00d4ff25;margin-top:4px;display:flex;gap:8px}
+.si-comments-col{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.si-comments-hdr{padding:10px 14px;border-bottom:1px solid #00d4ff10;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#00d4ff35;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.si-comments-list{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.si-comments-list::-webkit-scrollbar{width:2px}.si-comments-list::-webkit-scrollbar-thumb{background:#00d4ff15}
+.si-comment{border:1px solid #00d4ff12;border-radius:3px;padding:9px 11px;background:rgba(0,5,14,.5)}
+.si-comment-user{font-size:8px;letter-spacing:.8px;color:#00d4ff60;font-weight:600;margin-bottom:3px}
+.si-comment-text{font-size:9px;color:#00d4ff80;line-height:1.5}
+.si-comment-time{font-size:7.5px;color:#00d4ff25;margin-top:3px}
+.si-comment-actions{display:flex;gap:5px;margin-top:6px}
+.si-reply-input{flex:1;background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;padding:4px 8px;font-size:8.5px;font-family:'Courier New',monospace;border-radius:2px;outline:none}
+.si-reply-input:focus{border-color:#00d4ff50}
+.si-reply-btn{padding:4px 10px;background:transparent;border:1px solid #00d4ff35;color:#00d4ff60;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap}
+.si-reply-btn:hover{background:#00d4ff12;color:#00d4ff}
+.si-topbar{padding:8px 14px;border-bottom:1px solid #00d4ff10;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.si-topbar label{font-size:7.5px;letter-spacing:1.5px;color:#00d4ff35;text-transform:uppercase}
+.si-topbar input,.si-topbar select{background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;padding:4px 8px;font-size:9px;font-family:'Courier New',monospace;border-radius:2px;outline:none}
+.si-topbar input:focus,.si-topbar select:focus{border-color:#00d4ff50}
+.si-fetch-btn{padding:4px 12px;background:transparent;border:1px solid #00d4ff35;color:#00d4ff60;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.si-fetch-btn:hover{background:#00d4ff12;color:#00d4ff}
+.si-empty{padding:20px;text-align:center;font-size:9px;color:#00d4ff20;letter-spacing:1px}
+.si-ai-reply-btn{padding:4px 10px;background:transparent;border:1px solid #9b7dbf40;color:#9b7dbf80;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap}
+.si-ai-reply-btn:hover{background:#9b7dbf12;color:#9b7dbf}
+
+/* ── WHATSAPP ── */
+.wa-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.wa-panel::-webkit-scrollbar{width:2px}.wa-panel::-webkit-scrollbar-thumb{background:#25d36620}
+.wa-tabs{display:flex;gap:4px;border-bottom:1px solid #00d4ff10;padding-bottom:0;margin-bottom:2px}
+.wa-tab{padding:6px 13px;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:#00d4ff25;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;background:transparent;border-top:none;border-left:none;border-right:none;font-family:'Courier New',monospace}
+.wa-tab.active{color:#25d366;border-bottom-color:#25d36660}
+.wa-tab:hover{color:#25d36660}
+.wa-tab-content{display:none}.wa-tab-content.active{display:flex;flex-direction:column;gap:10px}
+.wa-section-lbl{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:#25d36650;border-bottom:1px solid #25d36615;padding-bottom:6px;margin-bottom:8px}
+.wa-template{border:1px solid #25d36620;border-radius:3px;background:rgba(0,5,14,.5);overflow:hidden;margin-bottom:6px}
+.wa-template-hdr{padding:8px 12px;background:#25d36608;display:flex;align-items:center;justify-content:space-between}
+.wa-template-name{font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;color:#25d36680}
+.wa-template-type{font-size:7px;letter-spacing:1px;padding:2px 6px;border:1px solid #25d36630;color:#25d36660;border-radius:2px;text-transform:uppercase}
+.wa-template-body{padding:10px 12px;font-size:9px;font-family:'Courier New',monospace;color:#00d4ff60;line-height:1.7;white-space:pre-wrap}
+.wa-copy-btn{padding:4px 10px;background:transparent;border:1px solid #25d36640;color:#25d36660;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;margin:0 12px 10px}
+.wa-copy-btn:hover{background:#25d36615;color:#25d366}
+.wa-flow-box{border:1px solid #00d4ff12;border-radius:3px;background:rgba(0,5,14,.5);padding:12px 14px}
+.wa-flow-step{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #00d4ff08}
+.wa-flow-step:last-child{border-bottom:none}
+.wa-flow-time{font-size:8px;font-family:'Courier New',monospace;color:#f0c040;width:70px;flex-shrink:0;padding-top:1px}
+.wa-flow-msg{font-size:8.5px;color:#00d4ff60;line-height:1.5}
+.wa-gen-form{display:flex;flex-direction:column;gap:10px}
+.wa-gen-input,.wa-gen-select,.wa-gen-textarea{width:100%;background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;padding:6px 9px;font-size:9.5px;font-family:'Courier New',monospace;border-radius:2px;outline:none;resize:vertical;box-sizing:border-box}
+.wa-gen-input:focus,.wa-gen-select:focus,.wa-gen-textarea:focus{border-color:#00d4ff50}
+.wa-gen-select option{background:#00050e}
+.wa-gen-btn{padding:7px 18px;background:transparent;border:1px solid #25d36660;color:#25d366;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.wa-gen-btn:hover{background:#25d36615;border-color:#25d366}
+.wa-result{background:rgba(0,8,19,.6);border:1px solid #25d36618;border-radius:3px;padding:14px;font-size:9px;font-family:'Courier New',monospace;color:#25d36680;white-space:pre-wrap;line-height:1.8;max-height:300px;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -1171,6 +1286,10 @@ Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento c
       <button class="mode-tab" id="tab-squads" onclick="setMode('squads')">🤖 Squads</button>
       <button class="mode-tab" id="tab-brain" onclick="setMode('brain')">🧠 Brain</button>
       <button class="mode-tab" id="tab-carrossel" onclick="setMode('carrossel')">🎨 Carrossel</button>
+      <button class="mode-tab" id="tab-sos" onclick="setMode('sos')">🆘 SOS</button>
+      <button class="mode-tab" id="tab-brief" onclick="setMode('brief')">📋 Brief</button>
+      <button class="mode-tab" id="tab-inbox" onclick="setMode('inbox')">💬 Social Inbox</button>
+      <button class="mode-tab" id="tab-whatsapp" onclick="setMode('whatsapp')">📱 WhatsApp</button>
     </div>
 
     <!-- MODE CONTENT -->
@@ -1844,6 +1963,236 @@ Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento c
         </div>
       </div><!-- /mode-carrossel -->
 
+      <!-- ── SOS MODE ── -->
+      <div class="mode-panel" id="mode-sos">
+        <div class="sos-panel">
+          <div class="sos-hdr">
+            <div class="sos-hdr-icon">🆘</div>
+            <div>
+              <h2>Central SOS</h2>
+              <p>Diagnóstico imediato para os problemas mais comuns em campanhas</p>
+            </div>
+          </div>
+
+          <!-- Cards gerados via JS -->
+          <div id="sos-cards-container"></div>
+
+          <div class="sos-tip">
+            <span style="font-size:14px;flex-shrink:0">⚡</span>
+            <span><strong style="color:#00d4ff80">Dica:</strong> Clique em um problema para abrir o checklist interativo. Use "Analisar com Alfred" para diagnóstico personalizado via IA.</span>
+          </div>
+        </div>
+      </div><!-- /mode-sos -->
+
+      <!-- ── BRIEF MODE ── -->
+      <div class="mode-panel" id="mode-brief">
+        <div class="bf-panel">
+          <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#00d4ff35;border-bottom:1px solid #00d4ff10;padding-bottom:8px">📋 Gerador de Brief Criativo</div>
+
+          <div class="bf-form-grid">
+            <div>
+              <label class="bf-label">Cliente *</label>
+              <select class="bf-select" id="bf-client">
+                <option value="Arena Publicidade">Arena Publicidade (B2B)</option>
+                <option value="Nova Beach">Nova Beach Campinas</option>
+                <option value="Bowa Bar">Bowa Bar</option>
+                <option value="Geral">Geral</option>
+              </select>
+            </div>
+            <div>
+              <label class="bf-label">Plataforma *</label>
+              <select class="bf-select" id="bf-platform">
+                <option value="Meta Ads (Feed)">Meta Ads — Feed</option>
+                <option value="Meta Ads (Stories/Reels)">Meta Ads — Stories/Reels</option>
+                <option value="Google Ads">Google Ads</option>
+                <option value="TikTok Ads">TikTok Ads</option>
+                <option value="LinkedIn Ads">LinkedIn Ads</option>
+                <option value="Orgânico Instagram">Orgânico Instagram</option>
+              </select>
+            </div>
+            <div>
+              <label class="bf-label">Formato *</label>
+              <select class="bf-select" id="bf-format">
+                <option value="Vídeo 15s">Vídeo 15s</option>
+                <option value="Vídeo 30s">Vídeo 30s</option>
+                <option value="Imagem estática">Imagem estática</option>
+                <option value="Carrossel">Carrossel</option>
+                <option value="UGC (Creator)">UGC — Creator</option>
+                <option value="Motion / After Effects">Motion / AE</option>
+              </select>
+            </div>
+            <div>
+              <label class="bf-label">Objetivo *</label>
+              <select class="bf-select" id="bf-objective">
+                <option value="Conversão (compra/matrícula)">Conversão</option>
+                <option value="Geração de leads">Geração de leads</option>
+                <option value="Awareness / Alcance">Awareness</option>
+                <option value="Consideração / Tráfego">Consideração</option>
+                <option value="Engajamento">Engajamento</option>
+                <option value="Remarketing">Remarketing</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="bf-label">Público-alvo *</label>
+            <input class="bf-input" id="bf-audience" placeholder="Ex: Adultos 28-45, interesses beach tennis, Campinas-SP, classes A/B"/>
+          </div>
+          <div>
+            <label class="bf-label">Produto / Oferta *</label>
+            <input class="bf-input" id="bf-product" placeholder="Ex: Plano trimestral beach tennis R$297/mês — vaga limitada"/>
+          </div>
+          <div>
+            <label class="bf-label">Direção criativa / Referência</label>
+            <input class="bf-input" id="bf-direction" placeholder="Ex: Estilo lifestyle, movimento, sem texto na imagem, câmera na areia"/>
+          </div>
+          <div>
+            <label class="bf-label">CTA desejado</label>
+            <input class="bf-input" id="bf-cta" placeholder="Ex: Garantir minha vaga | Falar com a equipe"/>
+          </div>
+          <div>
+            <label class="bf-label">Restrições / O que NÃO fazer</label>
+            <input class="bf-input" id="bf-restrictions" placeholder="Ex: Sem logo de concorrente, sem texto antes/depois, evitar filtros"/>
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <button class="bf-btn bf-btn-primary" id="bf-gen-btn" onclick="bfGenerate()">⚡ Gerar Brief com IA</button>
+            <button class="bf-btn" onclick="bfClear()">Limpar</button>
+            <button class="bf-btn" id="bf-copy-btn" onclick="bfCopy()" style="display:none">📋 Copiar</button>
+          </div>
+
+          <div id="bf-loading" style="display:none;font-size:9px;font-family:'Courier New',monospace;color:#f0c040;animation:pulse 1.5s infinite">Gerando brief...</div>
+          <div id="bf-result-wrap" style="display:none">
+            <div class="bf-result" id="bf-result"></div>
+          </div>
+        </div>
+      </div><!-- /mode-brief -->
+
+      <!-- ── SOCIAL INBOX MODE ── -->
+      <div class="mode-panel" id="mode-inbox">
+        <div style="display:flex;flex-direction:column;overflow:hidden;height:100%">
+          <!-- Topbar -->
+          <div class="si-topbar">
+            <label>Token Meta</label>
+            <input type="text" id="si-token" placeholder="Token Instagram Graph API" style="width:260px"/>
+            <label>IG User ID</label>
+            <input type="text" id="si-igid" placeholder="17841449062403565" value="17841449062403565" style="width:160px"/>
+            <button class="si-fetch-btn" onclick="siFetch()">⟳ Carregar Posts</button>
+            <select id="si-view" onchange="siToggleView(this.value)" style="background:rgba(0,8,19,.9);border:1px solid #00d4ff20;color:#00d4ff;padding:4px 8px;font-size:9px;font-family:'Courier New',monospace;border-radius:2px;outline:none">
+              <option value="comments">Comentários</option>
+              <option value="dms">DMs</option>
+            </select>
+          </div>
+          <!-- Main area -->
+          <div class="si-panel">
+            <!-- Posts column -->
+            <div class="si-posts-col">
+              <div class="si-posts-hdr">📸 Posts recentes</div>
+              <div class="si-posts-list" id="si-posts-list">
+                <div class="si-empty">Insira o token e carregue</div>
+              </div>
+            </div>
+            <!-- Comments / DMs column -->
+            <div class="si-comments-col">
+              <div class="si-comments-hdr">
+                <span id="si-col-title">💬 Comentários</span>
+                <button class="si-fetch-btn" onclick="siRefreshComments()" id="si-refresh-btn" style="display:none">⟳ Atualizar</button>
+              </div>
+              <div class="si-comments-list" id="si-comments-list">
+                <div class="si-empty">Selecione um post para ver os comentários</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /mode-inbox -->
+
+      <!-- ── WHATSAPP MODE ── -->
+      <div class="mode-panel" id="mode-whatsapp">
+        <div class="wa-panel">
+          <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#25d36650;border-bottom:1px solid #25d36615;padding-bottom:8px">📱 WhatsApp Marketing — Templates & Automação</div>
+
+          <!-- Tabs -->
+          <div class="wa-tabs">
+            <button class="wa-tab active" id="watab-utilidade" onclick="waSetTab('utilidade')">Utilidade</button>
+            <button class="wa-tab" id="watab-marketing" onclick="waSetTab('marketing')">Marketing</button>
+            <button class="wa-tab" id="watab-janela" onclick="waSetTab('janela')">Janela 24h</button>
+            <button class="wa-tab" id="watab-gerar" onclick="waSetTab('gerar')">⚡ Gerar com IA</button>
+          </div>
+
+          <!-- UTILIDADE -->
+          <div class="wa-tab-content active" id="wa-tab-utilidade">
+            <div class="wa-section-lbl">Templates de Utilidade</div>
+            <div id="wa-util-templates"></div>
+          </div>
+
+          <!-- MARKETING -->
+          <div class="wa-tab-content" id="wa-tab-marketing">
+            <div class="wa-section-lbl">Templates de Marketing</div>
+            <div id="wa-mkt-templates"></div>
+          </div>
+
+          <!-- JANELA 24H -->
+          <div class="wa-tab-content" id="wa-tab-janela">
+            <div class="wa-section-lbl">Metodologia Janela 24h</div>
+            <div class="wa-flow-box">
+              <div style="font-size:9px;color:#f0c040;margin-bottom:10px;letter-spacing:.5px">⚡ FLUXO — Nova Beach (exemplo completo)</div>
+              <div class="wa-flow-step"><div class="wa-flow-time">DISPARO</div><div class="wa-flow-msg"><strong style="color:#25d366">Utilidade:</strong> "Sua programação está confirmada. Toca para ver horários 👇 [Beach Tennis] [Funcional] [Eventos]"</div></div>
+              <div class="wa-flow-step"><div class="wa-flow-time">+5 min</div><div class="wa-flow-msg"><strong style="color:#25d366">Segmentação:</strong> Envia mensagem de marketing personalizada baseada no que o usuário clicou</div></div>
+              <div class="wa-flow-step"><div class="wa-flow-time">+1-3h</div><div class="wa-flow-msg"><strong style="color:#f0c040">Oferta:</strong> "Vi que você se interessou em beach tennis. Quer garantir sua vaga? [link]"</div></div>
+              <div class="wa-flow-step"><div class="wa-flow-time">+6-12h</div><div class="wa-flow-msg"><strong style="color:#f0c040">Urgência</strong> (sem resposta): "As vagas da manhã estão quase cheias essa semana..."</div></div>
+              <div class="wa-flow-step"><div class="wa-flow-time">+48h</div><div class="wa-flow-msg"><strong style="color:#00d4ff60">Reaquecimento:</strong> "Oi [Nome]! Ainda tem interesse em treinar beach tennis aqui? 😊"</div></div>
+              <div class="wa-flow-step"><div class="wa-flow-time">Sem resp.</div><div class="wa-flow-msg"><strong style="color:#ff6b00">Saída:</strong> Tag: perdido — remove do fluxo ativo</div></div>
+            </div>
+            <div class="wa-section-lbl" style="margin-top:10px">Timing recomendado</div>
+            <div class="wa-flow-box">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:8.5px">
+                <div style="color:#25d366">✅ 8-9h — Bom</div>
+                <div style="color:#25d366">✅ 12-13h — Ótimo</div>
+                <div style="color:#25d366">✅ 18-20h — Ótimo</div>
+                <div style="color:#ff6b00">❌ Após 21h — Nunca</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GERAR COM IA -->
+          <div class="wa-tab-content" id="wa-tab-gerar">
+            <div class="wa-section-lbl">Gerar Mensagem com IA</div>
+            <div class="wa-gen-form">
+              <div>
+                <label class="bf-label">Tipo de mensagem</label>
+                <select class="wa-gen-select" id="wa-gen-type">
+                  <option value="utilidade">Utilidade (confirmação, lembrete, cobrança)</option>
+                  <option value="marketing">Marketing (promoção, oferta, nutrição)</option>
+                  <option value="reaquecimento">Reaquecimento (inativo 48h)</option>
+                  <option value="urgencia">Urgência (vagas limitadas, oferta expira)</option>
+                  <option value="pos-compra">Pós-compra (onboarding, satisfação)</option>
+                </select>
+              </div>
+              <div>
+                <label class="bf-label">Cliente / Contexto</label>
+                <select class="wa-gen-select" id="wa-gen-client">
+                  <option value="Nova Beach">Nova Beach Campinas — beach tennis</option>
+                  <option value="Arena Publicidade">Arena Publicidade — B2B licenciamento</option>
+                  <option value="Bowa Bar">Bowa Bar — bar/restaurante</option>
+                  <option value="Geral">Geral</option>
+                </select>
+              </div>
+              <div>
+                <label class="bf-label">Contexto / O que dizer</label>
+                <textarea class="wa-gen-textarea" id="wa-gen-context" rows="3" placeholder="Ex: Usuário clicou em beach tennis mas não respondeu há 2 dias. Quero reaquecê-lo com uma mensagem leve."></textarea>
+              </div>
+              <button class="wa-gen-btn" id="wa-gen-btn" onclick="waGenerate()">⚡ Gerar Mensagem com Alfred</button>
+              <div id="wa-gen-loading" style="display:none;font-size:9px;font-family:'Courier New',monospace;color:#f0c040;animation:pulse 1.5s infinite">Gerando...</div>
+              <div id="wa-gen-result-wrap" style="display:none">
+                <div class="wa-result" id="wa-gen-result"></div>
+                <button class="wa-copy-btn" style="margin:8px 0 0" onclick="navigator.clipboard.writeText(document.getElementById('wa-gen-result').textContent)">📋 Copiar</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /mode-whatsapp -->
+
     </div><!-- /mode-content -->
 
     <div class="status-bar">
@@ -2475,7 +2824,18 @@ function toggleLeft(){
 }
 
 // ── SERVER PING ──
+const IS_CLOUD = location.protocol === 'https:';
+
 async function pingOllama(){
+  if(IS_CLOUD){
+    document.getElementById('top-status').textContent = 'Online · Claude API · Sonnet 4.6';
+    document.getElementById('status-bottom').textContent = 'Alfred · Claude API · claude-sonnet-4-6 · pronto';
+    const el = document.getElementById('ollama-r');
+    if(el){ el.textContent = 'Engine: Claude API'; el.style.color=''; }
+    if(document.getElementById('hud-engine')) document.getElementById('hud-engine').textContent = 'CLOUD';
+    if(document.getElementById('hud-model')) document.getElementById('hud-model').textContent = 'SONNET';
+    return;
+  }
   try{
     const r = await fetch('http://localhost:11434/api/tags', {signal:AbortSignal.timeout(4000)});
     if(r.ok){
@@ -3892,6 +4252,565 @@ document.getElementById('tab-carrossel')?.addEventListener('click', ()=>{
   // small delay to let panel become visible before rendering canvas
   setTimeout(()=>{ caInit(); }, 60);
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── SOS ───────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+const SOS_PROBLEMS = [
+  {
+    id:'roas_drop', icon:'📉', title:'ROAS caiu', severity:'crit',
+    symptom:'Retorno sobre gasto abaixo do esperado ou queda em relação ao período anterior',
+    checklist:[
+      'Verificar se o pixel de conversão está disparando corretamente',
+      'Checar se houve mudança nos preços ou no funil de vendas',
+      'Analisar se o público está saturado (frequência > 3)',
+      'Verificar se os criativos têm CTR caindo (fadiga criativa)',
+      'Comparar CPC, CPM e CTR vs período anterior',
+      'Checar se campanha nova está canibalizando tráfego',
+      'Verificar se a landing page mudou ou está com problema de velocidade',
+      'Confirmar se o período de comparação é justo (datas sazonais)',
+    ],
+    fixes:[
+      'Pausar campanhas com ROAS < 1 imediatamente',
+      'Ativar novos criativos para combater fadiga',
+      'Reduzir público para focar em melhores performers',
+      'Testar nova CTA ou oferta na landing page',
+      'Aumentar budget nos adsets que ainda têm bom ROAS',
+    ],
+    aiPrompt:'Meu ROAS caiu. Analisa os possíveis motivos pelos 8 Layers (público, criativo, oferta, funil, orçamento, algoritmo, competição, tracking). Classifica 🟢🟡🔴 e dá 1 ação por layer crítico. Finaliza com GARGALO PRINCIPAL e AÇÃO IMEDIATA (48h).'
+  },
+  {
+    id:'ctr_low', icon:'👁', title:'CTR muito baixo', severity:'warn',
+    symptom:'Taxa de cliques abaixo de 0.8% no feed ou 0.3% em outras posições',
+    checklist:[
+      'Verificar se o público está muito amplo ou pouco qualificado',
+      'Analisar se a imagem/vídeo está chamando atenção no feed',
+      'Checar se o headline tem proposta de valor clara',
+      'Avaliar se a oferta é relevante para o público segmentado',
+      'Verificar posicionamentos — remover os com pior CTR',
+      'Checar conformidade com políticas Meta (criativo não reprovado)',
+      'Comparar CTR por dispositivo (mobile vs desktop)',
+    ],
+    fixes:[
+      'Trocar imagem por algo mais visual e com contraste alto',
+      'Reescrever headline com promessa específica e clara',
+      'Adicionar prova social (números, depoimentos)',
+      'Testar carrossel vs imagem única vs vídeo',
+      'Excluir posicionamentos com CTR < 0.3% (Stories, Marketplace)',
+    ],
+    aiPrompt:'Meu CTR está muito baixo (abaixo de 0.8%). Analisa as possíveis causas pelos 8 Layers com foco em Layer 2 (Criativo) e Layer 1 (Público). Sugere 3 novos ângulos de hook para testar e 2 mudanças de segmentação. Classifica 🟢🟡🔴.'
+  },
+  {
+    id:'cpc_high', icon:'💸', title:'CPC muito alto', severity:'warn',
+    symptom:'Custo por clique acima do esperado para o nicho, consumindo budget sem conversões suficientes',
+    checklist:[
+      'Verificar se o score de qualidade/relevância está baixo',
+      'Analisar se o público está muito pequeno ou concorrido',
+      'Checar se a estratégia de lances está correta para o objetivo',
+      'Verificar sobreposição de públicos entre adsets',
+      'Analisar CTR — CTR baixo causa CPC alto no leilão',
+      'Checar período — datas comemorativas sobem CPM',
+      'Verificar alinhamento objetivo da campanha com ação desejada',
+    ],
+    fixes:[
+      'Melhorar CTR com novos criativos (reduz CPC indiretamente)',
+      'Ampliar público para dar mais alcance ao algoritmo',
+      'Mudar para lance "Custo mais baixo"',
+      'Eliminar sobreposição de públicos',
+      'Pausar adsets com CPC > 2x a média e redirecionar budget',
+    ],
+    aiPrompt:'Meu CPC está muito alto. Analisa os motivos pelos 8 Layers com foco em Layer 5 (Orçamento/Lances) e Layer 7 (Competição). Dá recomendações práticas para reduzir o CPC sem perder volume. Classifica 🟢🟡🔴.'
+  },
+  {
+    id:'leads_stopped', icon:'🛑', title:'Leads pararam', severity:'crit',
+    symptom:'Volume de leads caiu drasticamente ou zerou nas últimas 24-48 horas',
+    checklist:[
+      'Verificar se a campanha está ativa (não pausada por limite de gasto)',
+      'Checar se o formulário/landing page está funcionando',
+      'Confirmar que o pixel/evento de conversão está disparando',
+      'Verificar se o budget diário foi consumido cedo demais',
+      'Checar se há reprovação de anúncio recente',
+      'Analisar se o público esgotou (frequência muito alta)',
+      'Verificar integração CRM/leads (Zapier, webhook)',
+      'Checar se a aprovação da campanha está pendente',
+    ],
+    fixes:[
+      'Reiniciar a campanha se estiver em aprendizado muito limitado',
+      'Duplicar o adset melhor performer com público similar',
+      'Aumentar o budget diário em 20-30%',
+      'Criar nova campanha com público LAL de compradores',
+      'Testar landing page alternativa para isolar problema de conversão',
+    ],
+    aiPrompt:'Os leads pararam de chegar. Analisa as possíveis causas pelos 8 Layers com foco em Layer 4 (Funil/LP) e Layer 8 (Tracking). Cria um plano de ação de emergência com checklist priorizado. Classifica 🟢🟡🔴 e dá AÇÃO IMEDIATA (próximas 2h).'
+  },
+  {
+    id:'budget_burning', icon:'🔥', title:'Budget esgotando rápido', severity:'crit',
+    symptom:'Orçamento consumido muito antes do final do dia sem resultados esperados',
+    checklist:[
+      'Verificar se o orçamento está como "diário" e não "vitalício"',
+      'Checar a estratégia de lances (custo alto gasta rápido)',
+      'Analisar se muitos adsets competem pelo mesmo público',
+      'Verificar horário de veiculação — 24h sem necessidade?',
+      'Checar se há campanhas duplicadas rodando simultaneamente',
+      'Analisar se CPC/CPM está alto demais para o budget',
+    ],
+    fixes:[
+      'Ativar agendamento de horários (ex: 7h-23h)',
+      'Reduzir número de adsets para concentrar o budget',
+      'Mudar para orçamento do conjunto de anúncios',
+      'Pausar campanhas de awareness e focar em conversão',
+      'Adicionar limite de gasto diário por adset',
+    ],
+    aiPrompt:'Meu budget está esgotando muito rápido sem trazer os resultados esperados. Analisa pelos 8 Layers com foco em Layer 5 (Orçamento) e Layer 6 (Algoritmo). Onde o gasto está sendo desperdiçado? Dá plano de redistribuição de budget. Classifica 🟢🟡🔴.'
+  },
+  {
+    id:'ad_rejected', icon:'🚫', title:'Anúncio reprovado', severity:'warn',
+    symptom:'Anúncios sendo reprovados repetidamente pela Meta, impedindo veiculação',
+    checklist:[
+      'Ler o motivo específico da reprovação no Gerenciador',
+      'Verificar se imagem tem mais de 20% de texto',
+      'Checar se copy menciona características protegidas (raça, saúde, religião)',
+      'Analisar se a landing page está em conformidade com políticas',
+      'Verificar se o nicho é sensível (saúde, finanças) — exige mais cuidado',
+      'Checar se a conta tem histórico de muitas reprovações',
+      'Confirmar que Pixel e domínio estão verificados',
+    ],
+    fixes:[
+      'Editar anúncio reprovado removendo texto problemático',
+      'Trocar imagem por uma sem texto ou com texto mínimo',
+      'Reescrever copy evitando linguagem antes/depois ou promessas absolutas',
+      'Solicitar revisão manual se acreditar que reprovação foi erro',
+      'Criar variação do anúncio com abordagem diferente para testar',
+    ],
+    aiPrompt:'Tenho anúncios sendo reprovados pela Meta. Com base no nicho e no tipo de copy que uso, identifica as possíveis causas e reescreve o copy de forma que fique em conformidade com as políticas da Meta. Dá 3 variações seguras para testar.'
+  },
+];
+
+function sosInit(){
+  const container = document.getElementById('sos-cards-container');
+  if(!container || container.children.length > 0) return;
+  container.innerHTML = SOS_PROBLEMS.map(p => `
+    <div class="sos-card ${p.severity}" id="sos-${p.id}">
+      <div class="sos-card-hdr" onclick="sosToggle('${p.id}')">
+        <div class="sos-card-icon">${p.icon}</div>
+        <div style="flex:1">
+          <div class="sos-card-title">${p.title}</div>
+          <div class="sos-card-sym">${p.symptom}</div>
+        </div>
+        <span class="sos-badge ${p.severity}">${p.severity==='crit'?'Urgente':'Atenção'}</span>
+        <span class="sos-chevron">›</span>
+      </div>
+      <div class="sos-card-body" id="sosbody-${p.id}">
+        <div class="sos-section-lbl">Checklist de Diagnóstico</div>
+        ${p.checklist.map((item,i)=>`
+          <div class="sos-check-item" id="soscheck-${p.id}-${i}" onclick="sosCheckItem('${p.id}',${i})">
+            <div class="sos-check-box"></div>
+            <div class="sos-check-txt">${item}</div>
+          </div>`).join('')}
+        <div class="sos-section-lbl" style="margin-top:12px">Soluções Imediatas</div>
+        ${p.fixes.map(f=>`
+          <div class="sos-fix-item">
+            <div class="sos-fix-arr">→</div>
+            <div class="sos-fix-txt">${f}</div>
+          </div>`).join('')}
+        <button class="sos-ai-btn" onclick="sosAskAI('${p.id}')">⚡ Analisar com Alfred</button>
+      </div>
+    </div>`).join('');
+}
+
+function sosToggle(id){
+  const card = document.getElementById('sos-'+id);
+  const body = document.getElementById('sosbody-'+id);
+  if(!card||!body) return;
+  const isOpen = body.classList.contains('open');
+  // close all
+  document.querySelectorAll('.sos-card-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.sos-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen){ body.classList.add('open'); card.classList.add('open'); }
+}
+
+function sosCheckItem(problemId, idx){
+  const el = document.getElementById(`soscheck-${problemId}-${idx}`);
+  if(el) el.classList.toggle('done');
+}
+
+function sosAskAI(id){
+  const p = SOS_PROBLEMS.find(x=>x.id===id);
+  if(!p) return;
+  setMode('chat');
+  ask(p.aiPrompt);
+}
+
+document.getElementById('tab-sos')?.addEventListener('click', ()=>{ sosInit(); });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── BRIEF ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+async function bfGenerate(){
+  const client      = document.getElementById('bf-client')?.value||'';
+  const platform    = document.getElementById('bf-platform')?.value||'';
+  const format      = document.getElementById('bf-format')?.value||'';
+  const objective   = document.getElementById('bf-objective')?.value||'';
+  const audience    = document.getElementById('bf-audience')?.value?.trim()||'';
+  const product     = document.getElementById('bf-product')?.value?.trim()||'';
+  const direction   = document.getElementById('bf-direction')?.value?.trim()||'';
+  const cta         = document.getElementById('bf-cta')?.value?.trim()||'';
+  const restrictions= document.getElementById('bf-restrictions')?.value?.trim()||'';
+
+  if(!audience||!product){ alert('Preencha pelo menos Público-alvo e Produto/Oferta.'); return; }
+
+  const btn = document.getElementById('bf-gen-btn');
+  const loading = document.getElementById('bf-loading');
+  const wrap = document.getElementById('bf-result-wrap');
+  const result = document.getElementById('bf-result');
+  const copyBtn = document.getElementById('bf-copy-btn');
+
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Gerando...'; }
+  if(loading) loading.style.display='block';
+  if(wrap) wrap.style.display='none';
+
+  const system = `Você é especialista em briefing criativo para campanhas de tráfego pago no Brasil. Gera briefs profissionais e detalhados para designers, videomakers e criadores de conteúdo.
+
+ESTRUTURA DO BRIEF (use exatamente esta estrutura em markdown):
+## BRIEF CRIATIVO — [cliente] | [plataforma] | [formato]
+
+**OBJETIVO:** ...
+**PÚBLICO-ALVO:** ...
+**PRODUTO/OFERTA:** ...
+
+### HOOK (primeiros 3 segundos)
+Opção A: ...
+Opção B: ...
+
+### DESENVOLVIMENTO (meio do conteúdo)
+...
+
+### CTA FINAL
+...
+
+### DIREÇÃO VISUAL
+- Estilo: ...
+- Cores/Mood: ...
+- Câmera/Angulação: ...
+- Texto na tela: ...
+
+### REFERÊNCIAS DE TOM
+...
+
+### NÃO FAZER
+...
+
+### ENTREGÁVEIS
+- Formato: ...
+- Duração: ...
+- Legenda: ...
+- Versão sem som: ...
+
+*Responda em português. Seja específico e acionável.*`;
+
+  const user = `Gere um brief completo para:
+- Cliente: ${client}
+- Plataforma: ${platform}
+- Formato: ${format}
+- Objetivo: ${objective}
+- Público: ${audience}
+- Produto/Oferta: ${product}
+${direction?`- Direção criativa: ${direction}`:''}
+${cta?`- CTA desejado: ${cta}`:''}
+${restrictions?`- Restrições: ${restrictions}`:''}`;
+
+  try {
+    const text = await aiCall(system, user);
+    if(result){ result.textContent = text; }
+    if(wrap) wrap.style.display='block';
+    if(copyBtn) copyBtn.style.display='';
+  } catch(e){
+    if(result){ result.textContent = 'Erro: '+e.message; }
+    if(wrap) wrap.style.display='block';
+  }
+  if(loading) loading.style.display='none';
+  if(btn){ btn.disabled=false; btn.textContent='⚡ Gerar Brief com IA'; }
+}
+
+function bfClear(){
+  ['bf-audience','bf-product','bf-direction','bf-cta','bf-restrictions'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value='';
+  });
+  document.getElementById('bf-result-wrap').style.display='none';
+  document.getElementById('bf-copy-btn').style.display='none';
+}
+
+function bfCopy(){
+  const text = document.getElementById('bf-result')?.textContent||'';
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('bf-copy-btn');
+    if(btn){ btn.textContent='✓ Copiado!'; setTimeout(()=>btn.textContent='📋 Copiar',2000); }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── SOCIAL INBOX ──────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+let siCurrentMediaId = null;
+let siCurrentView = 'comments';
+const SI_PROXY = location.protocol==='https:' ? '/api/meta' : 'https://meta-arena-lac.vercel.app/api/meta';
+
+function siToggleView(v){
+  siCurrentView = v;
+  const title = document.getElementById('si-col-title');
+  if(title) title.textContent = v==='comments' ? '💬 Comentários' : '📨 DMs';
+  document.getElementById('si-comments-list').innerHTML = '<div class="si-empty">'+
+    (v==='comments' ? 'Selecione um post para ver os comentários' : 'Carregando DMs...')+
+  '</div>';
+  if(v==='dms') siFetchDMs();
+}
+
+async function siFetch(){
+  const token = document.getElementById('si-token')?.value?.trim();
+  const igId  = document.getElementById('si-igid')?.value?.trim() || '17841449062403565';
+  if(!token){ alert('Insira o Access Token do Meta/Instagram.'); return; }
+
+  const list = document.getElementById('si-posts-list');
+  list.innerHTML = '<div class="si-empty">Carregando posts...</div>';
+
+  try {
+    const r = await fetch(`${SI_PROXY}?path=${igId}/media&token=${encodeURIComponent(token)}&fields=id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count&limit=20`, {
+      signal: AbortSignal.timeout(15000)
+    });
+    const d = await r.json();
+    if(d.error){ list.innerHTML=`<div class="si-empty">⚠ ${d.error.message}</div>`; return; }
+
+    const posts = d.data||[];
+    if(!posts.length){ list.innerHTML='<div class="si-empty">Nenhum post encontrado</div>'; return; }
+
+    list.innerHTML = posts.map(p => {
+      const thumb = p.thumbnail_url||p.media_url||'';
+      const cap = (p.caption||'(sem legenda)').substring(0,80);
+      const ts = new Date(p.timestamp).toLocaleDateString('pt-BR');
+      return `<div class="si-post-item" id="sipost-${p.id}" onclick="siSelectPost('${p.id}','${encodeURIComponent(cap)}')">
+        ${thumb?`<div class="si-post-thumb"><img src="${thumb}" alt="" onerror="this.parentElement.style.display='none'"/></div>`:''}
+        <div class="si-post-caption">${cap}</div>
+        <div class="si-post-meta"><span>📅 ${ts}</span><span>💬 ${p.comments_count||0}</span><span>❤ ${p.like_count||0}</span></div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    list.innerHTML = `<div class="si-empty">⚠ Erro: ${e.message}</div>`;
+  }
+}
+
+async function siSelectPost(mediaId, captionEnc){
+  siCurrentMediaId = mediaId;
+  document.querySelectorAll('.si-post-item').forEach(el=>el.classList.remove('active'));
+  const el = document.getElementById('sipost-'+mediaId);
+  if(el) el.classList.add('active');
+
+  const refreshBtn = document.getElementById('si-refresh-btn');
+  if(refreshBtn) refreshBtn.style.display='';
+
+  if(siCurrentView==='dms'){ siFetchDMs(); return; }
+  siLoadComments(mediaId);
+}
+
+async function siLoadComments(mediaId){
+  const token = document.getElementById('si-token')?.value?.trim();
+  const list = document.getElementById('si-comments-list');
+  list.innerHTML='<div class="si-empty">Carregando comentários...</div>';
+
+  try {
+    const r = await fetch(`${SI_PROXY}?path=${mediaId}/comments&token=${encodeURIComponent(token)}&fields=id,text,username,timestamp,like_count,replies{id,text,username,timestamp}`, {
+      signal: AbortSignal.timeout(12000)
+    });
+    const d = await r.json();
+    if(d.error){ list.innerHTML=`<div class="si-empty">⚠ ${d.error.message}</div>`; return; }
+
+    const comments = d.data||[];
+    if(!comments.length){ list.innerHTML='<div class="si-empty">Nenhum comentário neste post</div>'; return; }
+
+    list.innerHTML = comments.map(c => {
+      const ts = new Date(c.timestamp).toLocaleString('pt-BR');
+      const replies = (c.replies?.data||[]).map(r=>
+        `<div style="margin-left:16px;margin-top:5px;padding:6px 9px;border-left:2px solid #00d4ff15;font-size:8px;color:#00d4ff50">
+          <strong style="color:#00d4ff40">↳ @${r.username}</strong>: ${r.text}
+        </div>`
+      ).join('');
+      return `<div class="si-comment">
+        <div class="si-comment-user">@${c.username} <span style="font-weight:normal;color:#00d4ff25">❤ ${c.like_count||0}</span></div>
+        <div class="si-comment-text">${c.text}</div>
+        <div class="si-comment-time">${ts}</div>
+        ${replies}
+        <div class="si-comment-actions">
+          <input class="si-reply-input" id="si-reply-${c.id}" placeholder="Responder..."/>
+          <button class="si-ai-reply-btn" onclick="siAiReply('${c.id}','${encodeURIComponent(c.text)}')">⚡ IA</button>
+          <button class="si-reply-btn" onclick="siPostReply('${c.id}')">↩ Responder</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    list.innerHTML=`<div class="si-empty">⚠ Erro: ${e.message}</div>`;
+  }
+}
+
+function siRefreshComments(){
+  if(!siCurrentMediaId) return;
+  siLoadComments(siCurrentMediaId);
+}
+
+async function siAiReply(commentId, textEnc){
+  const text = decodeURIComponent(textEnc);
+  const input = document.getElementById('si-reply-'+commentId);
+  if(!input) return;
+  input.placeholder='Gerando resposta...';
+  const system = `Você é o social media manager da conta. Responda comentários de forma humana, próxima e alinhada com a marca. Resposta máxima: 2 frases curtas. Sem emojis em excesso. Português BR.`;
+  try {
+    const reply = await aiCall(system, `Comentário: "${text}"\n\nGere uma resposta curta e natural.`);
+    input.value = reply.trim().substring(0,150);
+    input.placeholder='Responder...';
+  } catch{ input.placeholder='Responder...'; }
+}
+
+async function siPostReply(commentId){
+  const token = document.getElementById('si-token')?.value?.trim();
+  const input = document.getElementById('si-reply-'+commentId);
+  const message = input?.value?.trim();
+  if(!message){ input?.focus(); return; }
+
+  try {
+    const r = await fetch(`${SI_PROXY}?path=${commentId}/replies`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token, message})
+    });
+    const d = await r.json();
+    if(d.id || d.success){
+      if(input){ input.value=''; input.placeholder='Resposta enviada ✓'; setTimeout(()=>input.placeholder='Responder...',2000); }
+    } else {
+      alert('Erro ao enviar: '+(d.error?.message||'verifique permissões do token'));
+    }
+  } catch(e){ alert('Erro: '+e.message); }
+}
+
+async function siFetchDMs(){
+  const token = document.getElementById('si-token')?.value?.trim();
+  const igId  = document.getElementById('si-igid')?.value?.trim() || '17841449062403565';
+  const list  = document.getElementById('si-comments-list');
+  if(!token){ list.innerHTML='<div class="si-empty">Insira o token para ver DMs</div>'; return; }
+
+  list.innerHTML='<div class="si-empty">Carregando conversas...</div>';
+  try {
+    const r = await fetch(`${SI_PROXY}?path=${igId}/conversations&token=${encodeURIComponent(token)}&platform=instagram&fields=participants,messages{message,from,created_time}&limit=10`, {
+      signal: AbortSignal.timeout(12000)
+    });
+    const d = await r.json();
+    if(d.error){ list.innerHTML=`<div class="si-empty">⚠ ${d.error.message}</div>`; return; }
+    const convs = d.data||[];
+    if(!convs.length){ list.innerHTML='<div class="si-empty">Nenhuma conversa encontrada</div>'; return; }
+    list.innerHTML = convs.map(conv => {
+      const msgs = conv.messages?.data||[];
+      const last = msgs[0];
+      const participants = (conv.participants?.data||[]).map(p=>p.name||p.id).join(', ');
+      return `<div class="si-comment">
+        <div class="si-comment-user">${participants}</div>
+        ${last?`<div class="si-comment-text">${last.message||'(media)'}</div><div class="si-comment-time">${new Date(last.created_time).toLocaleString('pt-BR')}</div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e){ list.innerHTML=`<div class="si-empty">⚠ Erro: ${e.message}</div>`; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── WHATSAPP ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+const WA_UTIL_TEMPLATES = [
+  {name:'Confirmação de Pedido', type:'Utilidade', body:`Oi [Nome]! Pedido confirmado ✅\nRecebemos tudo certinho e já estamos separando pra você.\nAssim que sair para entrega, te avisamos aqui 📦`},
+  {name:'Rastreio de Entrega', type:'Utilidade', body:`[Nome], seu pedido saiu para entrega! 🚚\nAcompanhe aqui: [link direto]\nPrevisão: até [data específica].`},
+  {name:'Lembrete de Aula', type:'Utilidade', body:`Oi [Nome]! Lembrando da sua aula amanhã 🏖️\n📅 [dia], às [horário] | 📍 Nova Beach Campinas\nVai conseguir vir? Responde aqui pra confirmar sua vaga 👇`},
+  {name:'Cobrança Pendente', type:'Utilidade', body:`Oi [Nome], tudo bem?\nPassando para avisar que a [mensalidade] vence [quando].\n[Link para pagamento]\nSe já pagou, pode ignorar 😊`},
+  {name:'Código de Autenticação', type:'Autenticação', body:`Seu código de acesso: *[CÓDIGO]*\nVálido por 10 minutos. Não compartilhe com ninguém.`},
+];
+const WA_MKT_TEMPLATES = [
+  {name:'Promoção Relâmpago', type:'Marketing', body:`Oi [Nome]! 👋\nSó hoje: [Produto] com [benefício específico].\n[Urgência real]\n👉 [link]`},
+  {name:'Nutrição D+0 (Boas-vindas)', type:'Marketing', body:`Oi [Nome]! 🎉\nBem-vindo(a) ao [clube/comunidade]!\nAqui está o que você pediu: [link/material]\n\nNos próximos dias vou te contar como tirar o máximo disso 👇`},
+  {name:'Nutrição D+2 (Valor)', type:'Marketing', body:`[Nome], uma dica rápida:\n[Dica de valor relevante — sem pitch]\n\nFaz sentido no seu caso?`},
+  {name:'Reaquecimento (48h)', type:'Marketing', body:`Oi [Nome]! Tudo bem?\n[Referência ao interesse anterior — 1 linha]\nAinda posso te ajudar com isso? 😊`},
+  {name:'Urgência (Vagas)', type:'Marketing', body:`[Nome], só avisando:\nRestam [X] vagas para [oferta/turma].\nDepois disso fecha até [data].\n👉 [link]\n\nQuer garantir?`},
+];
+
+function waInitTemplates(){
+  const utilEl = document.getElementById('wa-util-templates');
+  const mktEl  = document.getElementById('wa-mkt-templates');
+  if(!utilEl||!mktEl||utilEl.children.length) return;
+
+  const render = (templates) => templates.map((t,i) => `
+    <div class="wa-template">
+      <div class="wa-template-hdr">
+        <span class="wa-template-name">${t.name}</span>
+        <span class="wa-template-type">${t.type}</span>
+      </div>
+      <div class="wa-template-body">${t.body}</div>
+      <button class="wa-copy-btn" onclick="waCopyTemplate(this,'${encodeURIComponent(t.body)}')">📋 Copiar</button>
+    </div>`).join('');
+
+  utilEl.innerHTML = render(WA_UTIL_TEMPLATES);
+  mktEl.innerHTML  = render(WA_MKT_TEMPLATES);
+}
+
+function waCopyTemplate(btn, enc){
+  navigator.clipboard.writeText(decodeURIComponent(enc)).then(()=>{
+    btn.textContent='✓ Copiado!';
+    setTimeout(()=>btn.textContent='📋 Copiar',2000);
+  });
+}
+
+function waSetTab(tab){
+  document.querySelectorAll('.wa-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.wa-tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('watab-'+tab)?.classList.add('active');
+  document.getElementById('wa-tab-'+tab)?.classList.add('active');
+}
+
+async function waGenerate(){
+  const type    = document.getElementById('wa-gen-type')?.value||'';
+  const client  = document.getElementById('wa-gen-client')?.value||'';
+  const context = document.getElementById('wa-gen-context')?.value?.trim()||'';
+  if(!context){ alert('Descreva o contexto da mensagem.'); return; }
+
+  const btn     = document.getElementById('wa-gen-btn');
+  const loading = document.getElementById('wa-gen-loading');
+  const wrap    = document.getElementById('wa-gen-result-wrap');
+  const result  = document.getElementById('wa-gen-result');
+
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Gerando...'; }
+  if(loading) loading.style.display='block';
+  if(wrap) wrap.style.display='none';
+
+  const system = `Você é especialista em WhatsApp Marketing no Brasil. Cria mensagens que parecem humanas, próximas e não spammy.
+
+REGRAS CRÍTICAS:
+- Máximo 3-4 linhas por mensagem
+- Tom humano — nunca "Prezado cliente" ou "Segue abaixo"
+- Um CTA por mensagem
+- Horários: 8-9h, 12-13h ou 18-20h (nunca após 21h)
+- Para utilidade: nunca ofereça desconto no 1º toque
+- Para marketing: benefício concreto antes do link
+
+Tipo da mensagem: ${type}
+Cliente/Contexto da marca: ${client}
+
+Gere a mensagem e em seguida explique em 1 linha o porquê das escolhas de tom e timing.`;
+
+  try {
+    const text = await aiCall(system, context);
+    if(result) result.textContent = text;
+    if(wrap) wrap.style.display='block';
+  } catch(e){
+    if(result) result.textContent = 'Erro: '+e.message;
+    if(wrap) wrap.style.display='block';
+  }
+  if(loading) loading.style.display='none';
+  if(btn){ btn.disabled=false; btn.textContent='⚡ Gerar Mensagem com Alfred'; }
+}
+
+document.getElementById('tab-whatsapp')?.addEventListener('click', ()=>{ waInitTemplates(); });
 </script>
 </body>
 </html>
