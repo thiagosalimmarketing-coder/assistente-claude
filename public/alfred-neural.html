@@ -454,11 +454,14 @@ body.speaking  .wave span{animation-duration:.15s!important;background:#ff6b00;b
 /* ── MODE BAR ── */
 .mode-bar{
   flex:0 0 36px;display:flex;align-items:center;
-  padding:0 16px;gap:2px;
+  padding:0 8px 0 16px;gap:2px;
   border-bottom:1px solid #00d4ff12;
   background:rgba(0,5,14,.98);z-index:19;
   position:relative;
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;
 }
+.mode-bar::-webkit-scrollbar{display:none}
 .mode-tab{
   padding:6px 13px;font-size:8.5px;letter-spacing:1.8px;text-transform:uppercase;
   color:#00d4ff25;border-bottom:2px solid transparent;
@@ -681,6 +684,124 @@ body.speaking  .wave span{animation-duration:.15s!important;background:#ff6b00;b
 .utm-lib-del:hover{color:#ff6b0070}
 .utm-tpl-btn{padding:4px 10px;background:transparent;border:1px solid #00d4ff15;color:#00d4ff35;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
 .utm-tpl-btn:hover{border-color:#00d4ff40;color:#00d4ff65;background:#00d4ff05}
+
+/* ── SQUADS ── */
+.sq-panel{flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:row;min-height:0}
+.sq-sidebar{width:220px;flex-shrink:0;border-right:1px solid #00d4ff12;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.sq-sidebar-lbl{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#00d4ff25;padding:0 4px;margin-bottom:6px}
+.sq-btn{width:100%;text-align:left;padding:9px 11px;border-radius:3px;background:transparent;border:1px solid transparent;color:#00d4ff35;font-size:9.5px;letter-spacing:.5px;font-family:'Courier New',monospace;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
+.sq-btn:hover{background:#00d4ff08;border-color:#00d4ff20;color:#00d4ff60}
+.sq-btn.active{background:#00d4ff0a;border-color:#00d4ff35;color:#00d4ff}
+.sq-icon{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sq-info{flex:1;min-width:0}
+.sq-name{font-size:9.5px;font-weight:bold;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sq-desc{font-size:8px;color:#00d4ff25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sq-main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.sq-agent-hdr{padding:10px 14px;border-bottom:1px solid #00d4ff10;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sq-agent-icon{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:#00d4ff0a;border:1px solid #00d4ff15}
+.sq-agent-name{font-size:11px;color:#00d4ff70;letter-spacing:.5px;margin-bottom:2px}
+.sq-agent-tag{font-size:8.5px;color:#00d4ff30;font-family:'Courier New',monospace}
+.sq-clear-btn{margin-left:auto;padding:4px 10px;background:transparent;border:1px solid #00d4ff15;color:#00d4ff30;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.sq-clear-btn:hover{border-color:#00d4ff35;color:#00d4ff55}
+.sq-quick-row{padding:8px 12px 0;display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.sq-qp{padding:3px 9px;border-radius:20px;border:1px solid #00d4ff15;background:transparent;color:#00d4ff30;font-size:8.5px;cursor:pointer;font-family:'Courier New',monospace;transition:all .15s}
+.sq-qp:hover{border-color:#00d4ff40;color:#00d4ff60}
+.sq-chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.sq-chat::-webkit-scrollbar{width:2px}
+.sq-chat::-webkit-scrollbar-thumb{background:#00d4ff10}
+.sq-msg-user{align-self:flex-end;max-width:80%;padding:9px 12px;border-radius:3px;background:#00d4ff08;border:1px solid #00d4ff20;font-size:10.5px;line-height:1.6;color:#00d4ff70}
+.sq-msg-ai{align-self:flex-start;max-width:85%;padding:9px 12px;border-radius:3px;background:rgba(0,8,19,.5);border:1px solid #00d4ff10;font-size:10.5px;line-height:1.75;color:#00d4ff50;white-space:pre-wrap}
+.sq-msg-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#00d4ff25;margin-bottom:4px}
+.sq-loading{display:flex;gap:4px;padding:10px 14px;align-self:flex-start}
+.sq-dot{width:5px;height:5px;border-radius:50%;background:#00d4ff20;animation:sq-bounce .9s infinite}
+.sq-dot:nth-child(2){animation-delay:.15s}
+.sq-dot:nth-child(3){animation-delay:.3s}
+@keyframes sq-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.sq-input-row{padding:10px 12px;border-top:1px solid #00d4ff10;display:flex;gap:6px;align-items:flex-end;flex-shrink:0}
+.sq-textarea{flex:1;min-height:36px;max-height:100px;resize:none;padding:8px 10px;background:rgba(0,8,19,.8);border:1px solid #00d4ff15;color:#00d4ff70;font-size:10.5px;font-family:'Courier New',monospace;border-radius:2px;outline:none;transition:border-color .2s;line-height:1.5}
+.sq-textarea:focus{border-color:#00d4ff40}
+.sq-send-btn{padding:8px 14px;background:#00d4ff12;border:1px solid #00d4ff35;color:#00d4ff70;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s;flex-shrink:0}
+.sq-send-btn:hover:not(:disabled){background:#00d4ff20;border-color:#00d4ff55;color:#00d4ff}
+.sq-send-btn:disabled{opacity:.35;cursor:not-allowed}
+.sq-welcome{text-align:center;padding:40px 20px;color:#00d4ff20;font-size:10.5px;font-family:'Courier New',monospace;line-height:2}
+
+/* ── BRAIN ── */
+.br-panel{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.br-panel::-webkit-scrollbar{width:2px}
+.br-panel::-webkit-scrollbar-thumb{background:#00d4ff15}
+.br-tabs{display:flex;gap:3px;border-bottom:1px solid #00d4ff10;margin-bottom:14px}
+.br-tab{padding:7px 14px;border:none;background:transparent;color:#00d4ff30;font-family:'Courier New',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-bottom:1px solid transparent;margin-bottom:-1px;transition:all .15s}
+.br-tab.active{color:#00d4ff70;border-bottom-color:#00d4ff50}
+.br-note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.br-note-card{background:rgba(0,8,19,.5);border:1px solid #00d4ff12;border-radius:3px;padding:11px 13px;cursor:pointer;transition:border-color .2s;border-left:3px solid #00d4ff15}
+.br-note-card:hover{border-color:#00d4ff30}
+.br-note-meta{font-size:8px;font-family:'Courier New',monospace;color:#00d4ff25;margin-bottom:4px;letter-spacing:.5px}
+.br-note-title{font-size:10.5px;color:#00d4ff60;margin-bottom:4px;line-height:1.3}
+.br-note-preview{font-size:9px;color:#00d4ff25;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.br-form-lbl{display:block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#00d4ff30;margin-bottom:5px}
+.br-input{width:100%;background:rgba(0,8,19,.8);border:1px solid #00d4ff15;color:#00d4ff70;padding:7px 10px;border-radius:2px;font-size:10px;font-family:'Courier New',monospace;outline:none;transition:border-color .2s}
+.br-input:focus{border-color:#00d4ff40}
+.br-select{width:100%;background:rgba(0,8,19,.9);border:1px solid #00d4ff15;color:#00d4ff60;padding:7px 10px;border-radius:2px;font-size:10px;font-family:'Courier New',monospace;outline:none;cursor:pointer}
+.br-select option{background:#000813}
+.br-textarea{width:100%;background:rgba(0,8,19,.8);border:1px solid #00d4ff15;color:#00d4ff70;padding:7px 10px;border-radius:2px;font-size:10px;font-family:'Courier New',monospace;outline:none;resize:vertical;line-height:1.6;transition:border-color .2s}
+.br-textarea:focus{border-color:#00d4ff40}
+.br-btn{padding:7px 14px;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.br-btn-primary{background:#00d4ff15;border:1px solid #00d4ff40;color:#00d4ff80}
+.br-btn-primary:hover{background:#00d4ff25;border-color:#00d4ff60;color:#00d4ff}
+.br-btn-ghost{background:transparent;border:1px solid #00d4ff15;color:#00d4ff30}
+.br-btn-ghost:hover{border-color:#00d4ff35;color:#00d4ff55}
+.br-btn-danger{background:#ff6b0010;border:1px solid #ff6b0025;color:#ff6b0060}
+.br-btn-danger:hover{border-color:#ff6b0050;color:#ff6b0090}
+.br-ai-result{background:rgba(0,8,19,.6);border-left:2px solid #9b59b650;border-radius:0 3px 3px 0;padding:12px 14px;font-size:10px;line-height:1.85;color:#00d4ff45;white-space:pre-wrap;font-family:'Courier New',monospace}
+.br-mode-pill{padding:6px 12px;border-radius:2px;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border:1px solid #00d4ff15;background:transparent;color:#00d4ff30;transition:all .15s;text-align:left}
+.br-mode-pill.active{border-color:#00d4ff40;background:#00d4ff0a;color:#00d4ff70}
+.br-empty{text-align:center;padding:30px 20px;color:#00d4ff15;font-size:9px;font-family:'Courier New',monospace}
+.br-loading{color:#f0c040;font-family:'Courier New',monospace;font-size:9.5px;padding:10px 12px;animation:pulse 1.5s infinite}
+
+/* ── CARROSSEL ── */
+.ca-panel{flex:1;overflow:hidden;display:flex;flex-direction:row;min-height:0}
+.ca-sidebar{width:260px;flex-shrink:0;border-right:1px solid #00d4ff12;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.ca-sidebar::-webkit-scrollbar{width:2px}
+.ca-sidebar::-webkit-scrollbar-thumb{background:#00d4ff10}
+.ca-sec-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#00d4ff30;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.ca-sec-lbl span{color:#00d4ff60}
+.ca-field{margin-bottom:8px}
+.ca-field label{display:block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#00d4ff25;margin-bottom:4px}
+.ca-input{width:100%;background:rgba(0,8,19,.8);border:1px solid #00d4ff15;color:#00d4ff70;padding:6px 9px;border-radius:2px;font-size:10px;font-family:'Courier New',monospace;outline:none;transition:border-color .2s}
+.ca-input:focus{border-color:#00d4ff40}
+.ca-select{width:100%;background:rgba(0,8,19,.9);border:1px solid #00d4ff15;color:#00d4ff60;padding:6px 9px;border-radius:2px;font-size:10px;font-family:'Courier New',monospace;outline:none;cursor:pointer}
+.ca-select option{background:#000813}
+.ca-textarea{width:100%;background:rgba(0,8,19,.8);border:1px solid #00d4ff15;color:#00d4ff70;padding:6px 9px;border-radius:2px;font-size:10px;font-family:'Courier New',monospace;outline:none;resize:none;line-height:1.6;transition:border-color .2s}
+.ca-textarea:focus{border-color:#00d4ff40}
+.ca-btn{padding:6px 12px;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;transition:all .2s}
+.ca-btn-primary{background:#00d4ff12;border:1px solid #00d4ff35;color:#00d4ff70}
+.ca-btn-primary:hover:not(:disabled){background:#00d4ff20;border-color:#00d4ff55;color:#00d4ff}
+.ca-btn-ghost{background:transparent;border:1px solid #00d4ff15;color:#00d4ff30}
+.ca-btn-ghost:hover:not(:disabled){border-color:#00d4ff35;color:#00d4ff55}
+.ca-btn:disabled{opacity:.35;cursor:not-allowed}
+.ca-slide-list{display:flex;flex-direction:column;gap:4px}
+.ca-slide-item{background:rgba(0,8,19,.4);border:1px solid #00d4ff10;border-radius:2px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+.ca-slide-item:hover{border-color:#00d4ff25}
+.ca-slide-item.active{border-color:#00d4ff40;background:#00d4ff08}
+.ca-slide-num{font-size:8.5px;font-family:'Courier New',monospace;color:#00d4ff25;width:16px;text-align:center;flex-shrink:0}
+.ca-slide-txt{font-size:9.5px;color:#00d4ff50;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ca-slide-del{background:transparent;border:none;color:#ff6b0025;cursor:pointer;font-size:11px;padding:2px 4px;border-radius:2px;transition:color .15s}
+.ca-slide-del:hover{color:#ff6b0070}
+.ca-canvas-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;gap:14px}
+.ca-canvas-area::-webkit-scrollbar{width:2px}
+.ca-canvas-area::-webkit-scrollbar-thumb{background:#00d4ff10}
+.ca-preview-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.ca-slide-canvas{position:relative;overflow:hidden;flex-shrink:0;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.7);border:1px solid #00d4ff15}
+.ca-nav-row{display:flex;align-items:center;gap:10px}
+.ca-nav-btn{width:28px;height:28px;border-radius:50%;background:rgba(0,8,19,.8);border:1px solid #00d4ff20;color:#00d4ff40;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.ca-nav-btn:hover:not(:disabled){border-color:#00d4ff45;color:#00d4ff80}
+.ca-nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.ca-counter{font-family:'Courier New',monospace;font-size:9.5px;color:#00d4ff30}
+.ca-dots{display:flex;gap:4px}
+.ca-dot{width:5px;height:5px;border-radius:50%;background:#00d4ff15;transition:all .2s;cursor:pointer}
+.ca-dot.active{background:#00d4ff50;width:14px;border-radius:2px}
+.ca-copy-all-area{width:100%;max-width:500px;background:rgba(0,8,19,.6);border:1px solid #00d4ff15;border-radius:3px;padding:12px;font-size:9.5px;font-family:'Courier New',monospace;color:#00d4ff40;white-space:pre-wrap;max-height:200px;overflow-y:auto;line-height:1.7}
+.ca-ai-status{font-size:9px;font-family:'Courier New',monospace;color:#f0c040;animation:pulse 1.5s infinite}
 </style>
 </head>
 <body>
@@ -1047,6 +1168,9 @@ Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento c
       <button class="mode-tab" id="tab-protector" onclick="setMode('protector')">🛡️ Protector</button>
       <button class="mode-tab" id="tab-demographics" onclick="setMode('demographics')">👥 Demográficos</button>
       <button class="mode-tab" id="tab-utm" onclick="setMode('utm')">🔗 UTM</button>
+      <button class="mode-tab" id="tab-squads" onclick="setMode('squads')">🤖 Squads</button>
+      <button class="mode-tab" id="tab-brain" onclick="setMode('brain')">🧠 Brain</button>
+      <button class="mode-tab" id="tab-carrossel" onclick="setMode('carrossel')">🎨 Carrossel</button>
     </div>
 
     <!-- MODE CONTENT -->
@@ -1509,6 +1633,216 @@ Objeções: "Tá caro" → "Em relação a quê? Representa <5% do faturamento c
           </div>
         </div>
       </div><!-- /mode-utm -->
+
+      <!-- ── SQUADS MODE ── -->
+      <div class="mode-panel" id="mode-squads">
+        <div class="sq-panel">
+
+          <!-- Sidebar -->
+          <div class="sq-sidebar">
+            <div class="sq-sidebar-lbl">Especialistas</div>
+            <div id="sq-list"></div>
+          </div>
+
+          <!-- Main -->
+          <div class="sq-main">
+            <div class="sq-agent-hdr">
+              <div class="sq-agent-icon" id="sq-agent-icon">⚡</div>
+              <div>
+                <div class="sq-agent-name" id="sq-agent-name">Selecione um Squad</div>
+                <div class="sq-agent-tag" id="sq-agent-tag">Escolha um especialista ao lado</div>
+              </div>
+              <button class="sq-clear-btn" onclick="sqClearChat()">Limpar</button>
+            </div>
+            <div id="sq-quick-row" class="sq-quick-row"></div>
+            <div class="sq-chat" id="sq-chat">
+              <div class="sq-welcome" id="sq-welcome">
+                ⚡ SQUADS IA<br>
+                Selecione um especialista para começar.
+              </div>
+            </div>
+            <div class="sq-input-row">
+              <textarea class="sq-textarea" id="sq-input" placeholder="Digite sua pergunta..." rows="1"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sqSend()}"
+                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+              <button class="sq-send-btn" id="sq-send-btn" onclick="sqSend()">↵ ENVIAR</button>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /mode-squads -->
+
+      <!-- ── BRAIN MODE ── -->
+      <div class="mode-panel" id="mode-brain">
+        <div class="br-panel">
+
+          <div class="br-tabs">
+            <button class="br-tab active" id="brtab-notes" onclick="brShowTab('notes')">📚 Notas</button>
+            <button class="br-tab" id="brtab-new" onclick="brShowTab('new')">+ Nova Nota</button>
+            <button class="br-tab" id="brtab-ai" onclick="brShowTab('ai')">⚡ Consultar IA</button>
+          </div>
+
+          <!-- NOTES LIST -->
+          <div id="br-tab-notes">
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <input class="br-input" style="flex:1;min-width:150px" id="br-search" placeholder="Buscar notas..." oninput="brRenderNotes()"/>
+              <select class="br-select" style="width:auto" id="br-filter-client" onchange="brRenderNotes()">
+                <option>Todos</option><option>Arena Publicidade</option><option>Nova Beach</option><option>Bowa Bar</option><option>Geral</option>
+              </select>
+            </div>
+            <div id="br-notes-grid" class="br-note-grid"></div>
+          </div>
+
+          <!-- NEW NOTE FORM -->
+          <div id="br-tab-new" style="display:none">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div><label class="br-form-lbl">Título *</label><input class="br-input" id="br-title" placeholder="Título da nota..."/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div><label class="br-form-lbl">Cliente</label>
+                  <select class="br-select" id="br-client">
+                    <option>Arena Publicidade</option><option>Nova Beach</option><option>Bowa Bar</option><option>Geral</option>
+                  </select></div>
+                <div><label class="br-form-lbl">Categoria</label>
+                  <select class="br-select" id="br-category">
+                    <option>Estratégia</option><option>Copy</option><option>Criativo</option><option>Performance</option><option>Geral</option>
+                  </select></div>
+              </div>
+              <div><label class="br-form-lbl">Conteúdo *</label>
+                <textarea class="br-textarea" id="br-content" rows="10" placeholder="Conteúdo da nota..."></textarea></div>
+              <div style="display:flex;gap:7px">
+                <button class="br-btn br-btn-primary" onclick="brSaveNote()">✓ Salvar Nota</button>
+                <button class="br-btn br-btn-ghost" onclick="brShowTab('notes')">← Cancelar</button>
+                <button class="br-btn br-btn-danger" id="br-del-btn" onclick="brDeleteNote()" style="display:none">✕ Remover</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI CONSULT -->
+          <div id="br-tab-ai" style="display:none">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:5px;margin-bottom:12px">
+              <button class="br-mode-pill active" id="brmode-consult" onclick="brSetMode('consult')">💬 Consultar</button>
+              <button class="br-mode-pill" id="brmode-strategy" onclick="brSetMode('strategy')">🎯 Estratégia</button>
+              <button class="br-mode-pill" id="brmode-copy" onclick="brSetMode('copy')">✍ Copy</button>
+              <button class="br-mode-pill" id="brmode-growth" onclick="brSetMode('growth')">🔬 Growth</button>
+            </div>
+            <label class="br-form-lbl">Sua pergunta</label>
+            <textarea class="br-textarea" id="br-ai-query" rows="4" style="margin-bottom:10px"
+              placeholder="Ex: Qual tom de voz usar para Arena Publicidade no LinkedIn?"></textarea>
+            <div style="display:flex;gap:7px;margin-bottom:14px">
+              <button class="br-btn br-btn-primary" id="br-ai-btn" onclick="brRunAI()">⚡ Consultar Brain</button>
+              <button class="br-btn br-btn-ghost" onclick="document.getElementById('br-ai-result-wrap').style.display='none';document.getElementById('br-ai-query').value=''">Limpar</button>
+            </div>
+            <div id="br-ai-loading" class="br-loading" style="display:none">Lendo notas do Brain e processando...</div>
+            <div id="br-ai-result-wrap" style="display:none">
+              <div class="br-ai-result" id="br-ai-result"></div>
+              <div style="display:flex;gap:6px;margin-top:8px">
+                <button class="br-btn br-btn-ghost" onclick="navigator.clipboard.writeText(document.getElementById('br-ai-result').textContent).then(()=>alert('Copiado!'))">Copiar</button>
+                <button class="br-btn br-btn-ghost" onclick="brSaveAIResult()">Salvar no Brain</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /mode-brain -->
+
+      <!-- ── CARROSSEL MODE ── -->
+      <div class="mode-panel" id="mode-carrossel">
+        <div class="ca-panel">
+
+          <!-- Sidebar -->
+          <div class="ca-sidebar">
+
+            <!-- AI Generator -->
+            <div>
+              <div class="ca-sec-lbl"><span>⚡</span> Gerar com IA</div>
+              <div class="ca-field">
+                <label>Tema / Assunto</label>
+                <textarea class="ca-textarea" id="ca-topic" rows="3" placeholder="Ex: Por que seu CTR está baixo e como corrigir"></textarea>
+              </div>
+              <div class="ca-field">
+                <label>Cliente / Contexto</label>
+                <select class="ca-select" id="ca-client">
+                  <option value="Arena Publicidade">Arena Publicidade (B2B)</option>
+                  <option value="Nova Beach">Nova Beach (Beach Tennis)</option>
+                  <option value="Geral">Marketing Geral</option>
+                  <option value="livre">Livre</option>
+                </select>
+              </div>
+              <div class="ca-field">
+                <label>Número de slides</label>
+                <select class="ca-select" id="ca-num-slides">
+                  <option value="5">5 slides</option>
+                  <option value="7" selected>7 slides</option>
+                  <option value="10">10 slides</option>
+                </select>
+              </div>
+              <div class="ca-field">
+                <label>Tom</label>
+                <select class="ca-select" id="ca-tone">
+                  <option value="educativo e direto">Educativo e direto</option>
+                  <option value="provocativo e polêmico">Provocativo e polêmico</option>
+                  <option value="consultivo e estratégico">Consultivo e estratégico</option>
+                  <option value="motivacional">Motivacional</option>
+                </select>
+              </div>
+              <button class="ca-btn ca-btn-primary" style="width:100%;padding:9px" id="ca-gen-btn" onclick="caGenerate()">⚡ Gerar Slides com IA</button>
+              <div id="ca-ai-status" style="display:none;margin-top:7px;font-size:9px;font-family:'Courier New',monospace;color:#f0c040;animation:pulse 1.5s infinite"></div>
+            </div>
+
+            <!-- Slide List -->
+            <div>
+              <div class="ca-sec-lbl"><span>📋</span> Slides <span id="ca-count" style="color:#00d4ff30;letter-spacing:0"></span></div>
+              <div id="ca-slide-list" class="ca-slide-list" style="margin-bottom:8px"></div>
+              <div style="display:flex;gap:5px">
+                <button class="ca-btn ca-btn-ghost" style="flex:1" onclick="caAddSlide()">+ Novo</button>
+                <button class="ca-btn ca-btn-ghost" onclick="caDuplicateSlide()">⎘</button>
+              </div>
+            </div>
+
+            <!-- Slide Editor -->
+            <div id="ca-editor-sec">
+              <div class="ca-sec-lbl"><span>✎</span> Slide <span id="ca-edit-num" style="color:#00d4ff30;letter-spacing:0"></span></div>
+              <div class="ca-field"><label>Título</label><textarea class="ca-textarea" id="ca-ed-title" rows="2" oninput="caUpdateCurrent()" placeholder="Título impactante..."></textarea></div>
+              <div class="ca-field"><label>Corpo</label><textarea class="ca-textarea" id="ca-ed-body" rows="3" oninput="caUpdateCurrent()" placeholder="Desenvolvimento..."></textarea></div>
+              <div class="ca-field"><label>CTA</label><input class="ca-input" id="ca-ed-cta" oninput="caUpdateCurrent()" placeholder="Ex: Deslize →"/></div>
+              <div class="ca-field">
+                <label>Fundo</label>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px" id="ca-bg-palette"></div>
+              </div>
+              <div class="ca-field">
+                <label>Cor de destaque</label>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px" id="ca-acc-palette"></div>
+              </div>
+            </div>
+
+            <!-- Copy All -->
+            <div>
+              <div class="ca-sec-lbl"><span>📋</span> Exportar Texto</div>
+              <button class="ca-btn ca-btn-ghost" style="width:100%;padding:8px" onclick="caCopyAll()">Copiar Todos os Slides</button>
+            </div>
+
+          </div><!-- /ca-sidebar -->
+
+          <!-- Canvas Area -->
+          <div class="ca-canvas-area">
+
+            <div class="ca-nav-row">
+              <button class="ca-nav-btn" id="ca-btn-prev" onclick="caGoTo(caCurrentSlide-1)">‹</button>
+              <div class="ca-counter" id="ca-counter">1 / 1</div>
+              <button class="ca-nav-btn" id="ca-btn-next" onclick="caGoTo(caCurrentSlide+1)">›</button>
+            </div>
+
+            <div class="ca-preview-wrap">
+              <div id="ca-slide-canvas" class="ca-slide-canvas"></div>
+              <div class="ca-dots" id="ca-dots"></div>
+            </div>
+
+            <div id="ca-copy-all-area" class="ca-copy-all-area" style="display:none"></div>
+
+          </div><!-- /ca-canvas-area -->
+
+        </div>
+      </div><!-- /mode-carrossel -->
 
     </div><!-- /mode-content -->
 
@@ -2904,6 +3238,660 @@ function utmTemplate(source, medium){
 });
 
 utmRenderLibrary();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── AICALL — engine unificada (Ollama → Claude fallback) ─────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+async function aiCall(systemPrompt, userMessage, onStream) {
+  // Tenta Ollama primeiro
+  try {
+    const r = await fetch('http://localhost:11434/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'qwen2.5:14b',
+        messages: [{role:'system', content:systemPrompt},{role:'user', content:userMessage}],
+        stream: true
+      }),
+      signal: AbortSignal.timeout(60000)
+    });
+    if (!r.ok) throw new Error('ollama offline');
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let full = '';
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      for(const line of dec.decode(value,{stream:true}).split('\n')){
+        if(!line.trim()) continue;
+        try{
+          const d = JSON.parse(line);
+          if(d.message?.content){ full += d.message.content; if(onStream) onStream(full, false); }
+        }catch{}
+      }
+    }
+    if(onStream) onStream(full, true);
+    return full;
+  } catch {
+    // Fallback Claude API
+    const cr = await fetch('/api/claude', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({system:systemPrompt, messages:[{role:'user',content:userMessage}]})
+    });
+    const cd = await cr.json();
+    const text = cd.content?.[0]?.text || cd.text || 'Erro na resposta da IA.';
+    if(onStream) onStream(text, true);
+    return text;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── SQUADS IA ─────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+const SQ_SQUADS = [
+  {
+    id:'performance', name:'Head de Performance', icon:'📊', color:'#d4956a',
+    tagline:'Diagnóstico · 9 Camadas · Benchmarks Meta BR',
+    quickPrompts:['Analisa CTR 0.6% e frequência 5.2','Qual o gargalo da minha campanha?','Como reduzir CPL sem cortar budget?','Quando devo escalar?'],
+    system:`Você é o Head de Performance, especialista sênior em Meta Ads, Google Ads e TikTok Ads no Brasil. Direto, estratégico, sem rodeios. Diagnostica antes de prescrever.
+
+METODOLOGIA — 9 CAMADAS: 1.Estratégia 2.Oferta 3.Posicionamento 4.Público 5.Criativo 6.Funil 7.UX 8.Dados 9.Infraestrutura
+
+BENCHMARKS META ADS BR:
+- E-commerce: CTR 1-2.5%, CPC R$0,80-2,50, CPM R$18-45, ROAS mín 2.5x, Freq ideal 2-3.5
+- Serviços locais: CTR 1.5-3.5%, CPL R$15-60, CPM R$20-55
+- B2B Lead Gen: CTR 0.5-1.5%, CPL R$50-250, taxa qualificação 20-40%
+
+SINAIS: Freq>4.5 trocar criativo | CTR caindo >30% em 7d público saturado | CPM subindo >40% qualidade baixa
+
+SAÍDA: 1.GARGALO PRINCIPAL 2.CLASSIFICAÇÃO 🟢🟡🔴 3.AÇÕES IMEDIATAS (48h) 4.TESTES A/B
+
+Responda em português. Seja específico.`
+  },
+  {
+    id:'copy', name:'Copywriter de Anúncios', icon:'✍', color:'#9b7dbf',
+    tagline:'Copies · Headlines · CTAs · Hooks Meta/Google',
+    quickPrompts:['Cria 3 hooks para beach tennis','Copy B2B para gestores de marketing','5 headlines para Google Ads academia','Reescreve meu copy com mais urgência'],
+    system:`Você é o Copywriter especialista em copy para tráfego pago no Brasil. Criativo, persuasivo, orientado a conversão.
+
+FRAMEWORK: 1.HOOK (para o scroll) 2.PROBLEMA AMPLIFICADO 3.SOLUÇÃO 4.PROVA SOCIAL (número específico) 5.CTA direto
+
+REGRAS BR: tutear sempre | números específicos > generalizações | benefício antes de feature | frases curtas mobile 125 chars | sem urgência falsa
+
+HOOKS: "Você sabia que [dado]?" | "[X]% dos [público] cometem esse erro" | "O motivo pelo qual seu [resultado] não melhora é..."
+
+Sempre 3 variações para A/B. Responda em português.`
+  },
+  {
+    id:'estrategista', name:'Estrategista de Funil', icon:'🎯', color:'#6a8eb5',
+    tagline:'Funis · ToFu/MoFu/BoFu · Estratégia de campanha',
+    quickPrompts:['Monte funil para academia local','Estratégia B2B LinkedIn Ads','Como estruturar campanha de lançamento?','Funil para e-commerce de cosméticos'],
+    system:`Você é o Estrategista de Funil, especialista em jornada do cliente e estrutura de campanhas no Brasil. Pensamento sistêmico.
+
+ESTRUTURA: ToFu(Consciência): awareness, alcance, CPM/CTR | MoFu(Consideração): leads, engajamento, CPL | BoFu(Conversão): compra, matrícula, CPA/ROAS | Pós-venda: LTV, retenção
+
+PÚBLICOS: ToFu: broad, interesses, lookalike frio | MoFu: visitantes, engajados, LAL leads | BoFu: abandono, LAL compradores, retargeting 7d
+
+Ao criar estratégia: objetivo por etapa, público, formato, copy direction, KPI, budget sugerido. Responda em português.`
+  },
+  {
+    id:'criativos', name:'Diretor de Criativos', icon:'🎨', color:'#5bad85',
+    tagline:'Briefs · UGC · Formatos · Direção visual',
+    quickPrompts:['Brief para vídeo UGC beach tennis','O que está matando meu criativo?','Melhores formatos Meta 2025','Como criar hook visual forte Reels?'],
+    system:`Você é o Diretor de Criativos, especialista em produção criativa para tráfego pago no Brasil. Visual, direto, orientado a resultado.
+
+FRAMEWORK 15s: 0-2s HOOK VISUAL (sem som) | 2-5s PROBLEMA | 5-10s SOLUÇÃO em ação | 10-13s PROVA | 13-15s CTA
+
+UGC FORMULA: câmera frontal + iluminação natural + pessoa falando direto + legenda (80% sem som) + sem logo nos primeiros 3s
+
+DIAGNÓSTICO: CTR <0.5% em 3 dias = hook não funciona | Alto play rate + baixo CTR = CTA fraco | Alto CTR + baixa conv = promessa vs entrega desalinhada
+
+FORMATOS META 2025: UGC vertical 9:16 (15-30s) > Carrossel feed > Imagem estática > Stories. Responda em português.`
+  },
+  {
+    id:'growth', name:'Head de Growth', icon:'🔬', color:'#e07070',
+    tagline:'Escala · Otimização · ROI · Plano 7 dias',
+    quickPrompts:['Sistema pronto para escalar?','Como reduzir CAC em 30%?','Análise completa do meu sistema','Plano 30 dias para dobrar leads'],
+    system:`Você é Head de Growth Sênior. Diagnóstica gargalos, identifica falhas ocultas, melhora eficiência e prepara sistemas para escala previsível.
+
+REGRAS: sempre encontrar GARGALO PRINCIPAL | pensar em ROI | NUNCA sugerir aumentar tráfego se o problema for conversão | NUNCA escalar sistema não validado
+
+9 CAMADAS: 1.Estratégia 2.Oferta 3.Posicionamento 4.Público 5.Criativo 6.Funil 7.UX 8.Dados 9.Infraestrutura
+
+SAÍDA: 1.GARGALO PRINCIPAL 2.CLASSIFICAÇÃO 🟢🟡🔴 3.TIPO DE PROBLEMA 4.FALHAS MAPEADAS 5.OTIMIZAÇÕES (quick wins|estruturais|escala) 6.TESTES PRÁTICOS 7.PLANO 7 DIAS
+
+Responda em português. Seja direto e impiedoso.`
+  },
+  {
+    id:'linkedin', name:'Especialista LinkedIn Ads', icon:'💼', color:'#d4c06a',
+    tagline:'B2B · Lead Gen · Targeting corporativo · CPL',
+    quickPrompts:['Segmentar gestores de marketing LinkedIn','Objetivo para B2B Lead Gen?','CPL alto LinkedIn — o que fazer?','Lead Gen Forms vs conversão no site'],
+    system:`Você é Especialista em LinkedIn Ads focado em campanhas B2B para o Brasil. Estratégico, corporativo, orientado a CPL e qualificação.
+
+BENCHMARKS LINKEDIN BR: CPM R$40-100 | CTR bom >0.5% | CPL bom R$80-200 B2B | Lead Gen Form CVR 5-15%
+
+SEGMENTAÇÃO B2B: Cargo + Senioridade (Gestor, Diretor, C-level) | Tamanho empresa (200-5000 func.) | Setor | Habilidades | Grupos profissionais
+
+FORMATOS: Sponsored Content (feed) | Lead Gen Form (menor atrito) | Message Ads (decisores) | Document Ads (whitepaper, e-book)
+
+COPY B2B: tom consultivo não vendedor | ROI e eficiência | case study como prova | CTA suave: "Saiba mais" "Ver case" "Receber proposta"
+
+Responda em português. Técnico e orientado a resultado B2B.`
+  },
+  {
+    id:'relatorio', name:'Analista de Relatórios', icon:'📋', color:'#6a9e8e',
+    tagline:'Relatórios para clientes · Storytelling de dados',
+    quickPrompts:['Como apresentar queda de performance?','Monte relatório mensal Arena Publicidade','Como justificar aumento de CPL?','Estrutura ideal de relatório semanal'],
+    system:`Você é Analista de Relatórios, especialista em comunicar resultados de marketing digital para clientes de forma clara e estratégica.
+
+ESTRUTURA VÓRTEX: 1.SUMÁRIO EXECUTIVO (3 linhas) 2.RESULTADOS DO PERÍODO (métricas vs meta vs anterior) 3.O QUE FUNCIONOU (top 3) 4.OPORTUNIDADES IDENTIFICADAS 5.PRÓXIMOS PASSOS
+
+RESULTADOS RUINS: nunca esconder, sempre contextualizar com solução | "CPL subiu 23% — identificamos saturação, plano de ação para 2 semanas"
+
+VOCABULÁRIO CLIENTE: CTR → "taxa de interesse nos anúncios" | CPL → "custo para captar cada lead" | ROAS → "para R$1 investido, geramos R$X" | Frequência → "vezes que cada pessoa viu o anúncio"
+
+Responda em português. Gere relatórios prontos para enviar ao cliente.`
+  }
+];
+
+let sqCurrentSquad = null;
+let sqChatHistory = [];
+let sqIsLoading = false;
+
+function sqRenderSidebar(){
+  const list = document.getElementById('sq-list');
+  if(!list) return;
+  list.innerHTML = SQ_SQUADS.map(s => `
+    <button class="sq-btn ${sqCurrentSquad?.id===s.id?'active':''}" onclick="sqSelectSquad('${s.id}')">
+      <div class="sq-icon" style="background:${s.color}18;border:1px solid ${s.color}30">${s.icon}</div>
+      <div class="sq-info">
+        <div class="sq-name" style="color:${sqCurrentSquad?.id===s.id?s.color:'#00d4ff50'}">${s.name}</div>
+        <div class="sq-desc">${s.tagline.split('·')[0].trim()}</div>
+      </div>
+    </button>`).join('');
+}
+
+function sqSelectSquad(id){
+  sqCurrentSquad = SQ_SQUADS.find(s=>s.id===id);
+  sqChatHistory = [];
+  sqRenderSidebar();
+
+  const icon = document.getElementById('sq-agent-icon');
+  const name = document.getElementById('sq-agent-name');
+  const tag  = document.getElementById('sq-agent-tag');
+  if(icon){ icon.textContent = sqCurrentSquad.icon; icon.style.borderColor = sqCurrentSquad.color+'40'; }
+  if(name){ name.textContent = sqCurrentSquad.name; name.style.color = sqCurrentSquad.color; }
+  if(tag)  tag.textContent  = sqCurrentSquad.tagline;
+
+  const qr = document.getElementById('sq-quick-row');
+  if(qr) qr.innerHTML = sqCurrentSquad.quickPrompts.map(p =>
+    `<button class="sq-qp" onclick="sqSendQuick('${p.replace(/'/g,"\\'")}')">${p}</button>`
+  ).join('');
+
+  const chat = document.getElementById('sq-chat');
+  if(chat){
+    chat.innerHTML = `
+      <div class="sq-msg-ai">
+        <div class="sq-msg-lbl">${sqCurrentSquad.name}</div>
+        Pronto para trabalhar. Sou especialista em ${sqCurrentSquad.tagline.split('·')[0].trim().toLowerCase()}.\n\nTraga qualquer campanha, dúvida ou situação — vou direto ao ponto.
+      </div>`;
+  }
+}
+
+async function sqSend(){
+  if(!sqCurrentSquad || sqIsLoading) return;
+  const inp = document.getElementById('sq-input');
+  const msg = inp?.value?.trim();
+  if(!msg) return;
+
+  sqAddMsg('user', msg);
+  inp.value = ''; inp.style.height = 'auto';
+  sqChatHistory.push({role:'user', content:msg});
+
+  sqIsLoading = true;
+  const btn = document.getElementById('sq-send-btn');
+  if(btn) btn.disabled = true;
+
+  const loadId = 'sq-load-'+Date.now();
+  const chat = document.getElementById('sq-chat');
+  if(chat){
+    chat.insertAdjacentHTML('beforeend',`<div class="sq-loading" id="${loadId}"><div class="sq-dot"></div><div class="sq-dot"></div><div class="sq-dot"></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  // Create streaming message element
+  const aiMsgId = 'sq-ai-' + Date.now();
+  let aiMsgCreated = false;
+
+  try {
+    await aiCall(sqCurrentSquad.system, msg, (text, done) => {
+      document.getElementById(loadId)?.remove();
+      if(!aiMsgCreated){
+        const el = document.createElement('div');
+        el.className = 'sq-msg-ai';
+        el.id = aiMsgId;
+        el.innerHTML = `<div class="sq-msg-lbl">${sqCurrentSquad.name}</div><span class="sq-stream-text"></span>`;
+        chat.appendChild(el);
+        aiMsgCreated = true;
+      }
+      const span = document.getElementById(aiMsgId)?.querySelector('.sq-stream-text');
+      if(span) span.textContent = text;
+      if(chat) chat.scrollTop = chat.scrollHeight;
+      if(done) sqChatHistory.push({role:'assistant', content:text});
+    });
+  } catch(e) {
+    document.getElementById(loadId)?.remove();
+    sqAddMsg('ai', `Erro: ${e.message}`);
+  }
+
+  sqIsLoading = false;
+  if(btn) btn.disabled = false;
+}
+
+function sqSendQuick(prompt){
+  const inp = document.getElementById('sq-input');
+  if(inp) inp.value = prompt;
+  sqSend();
+}
+
+function sqAddMsg(role, text){
+  const chat = document.getElementById('sq-chat');
+  if(!chat) return;
+  const el = document.createElement('div');
+  el.className = role === 'user' ? 'sq-msg-user' : 'sq-msg-ai';
+  if(role === 'ai'){
+    el.innerHTML = `<div class="sq-msg-lbl">${sqCurrentSquad?.name||'Squad'}</div>${text}`;
+  } else {
+    el.textContent = text;
+  }
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function sqClearChat(){
+  if(sqCurrentSquad) sqSelectSquad(sqCurrentSquad.id);
+}
+
+// Init squads sidebar when tab is selected (lazy)
+document.getElementById('tab-squads')?.addEventListener('click', ()=>{
+  if(!document.getElementById('sq-list').children.length) sqRenderSidebar();
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── BRAIN ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+const BR_LS_KEY = 'alfred_brain_notes';
+let brNotes = [];
+let brCurrentNoteId = null;
+let brAiMode = 'consult';
+
+const BR_SEED = [
+  {id:'arena-perfil',title:'Arena Publicidade — Perfil',client:'Arena Publicidade',category:'Estratégia',
+   content:'Posicionamento: licenciamento B2B (Turma da Mônica, Disney) para kits promocionais. Ticket médio R$40k. Tom: consultivo, profissional, ROI-focado. Público: gestores de marketing/RH, empresas 200+ func. KPIs: CPL <R$150, MQL→reunião >20%.'},
+  {id:'novabeach-perfil',title:'Nova Beach — Perfil',client:'Nova Beach',category:'Estratégia',
+   content:'Beach tennis e funcional na areia — Campinas/SP. Tom: energético, comunitário, aspiracional. Público: adultos 25-45, classes A/B, Campinas. Budget: R$1-3k/mês. KPIs: CPL <R$40, conv experimental→matrícula >30%.'},
+  {id:'benchmarks-meta',title:'Benchmarks Meta Ads Brasil',client:'Geral',category:'Performance',
+   content:'E-commerce: CTR 1-2.5%, CPC R$0,80-2,50, CPM R$18-45, ROAS mín 2.5x, Freq 2-3.5. Serviços locais: CTR 1.5-3.5%, CPL R$15-60. B2B: CTR 0.5-1.5%, CPL R$50-250. Alerta: Freq>4.5, CTR caindo >30% em 7d, CPM subindo >40%.'},
+  {id:'copy-framework',title:'Framework de Copy',client:'Geral',category:'Copy',
+   content:'1.HOOK (dado/pergunta/problema) 2.PROBLEMA AMPLIFICADO 3.SOLUÇÃO 4.PROVA SOCIAL (número específico) 5.CTA específico. Hooks: "Você sabia que [dado]?" | "[X]% cometem esse erro" | "O motivo pelo qual [resultado] não melhora é...". Sempre 3 variações A/B.'},
+];
+
+function brLoad(){
+  try{ return JSON.parse(localStorage.getItem(BR_LS_KEY)||'null') || JSON.parse(JSON.stringify(BR_SEED)); }
+  catch{ return JSON.parse(JSON.stringify(BR_SEED)); }
+}
+function brSave(){ localStorage.setItem(BR_LS_KEY, JSON.stringify(brNotes)); }
+
+function brInit(){
+  brNotes = brLoad();
+  brRenderNotes();
+}
+
+function brShowTab(tab){
+  ['notes','new','ai'].forEach(t=>{
+    const el = document.getElementById('br-tab-'+t);
+    const btn = document.getElementById('brtab-'+t);
+    if(el) el.style.display = t===tab ? 'block' : 'none';
+    if(btn) btn.classList.toggle('active', t===tab);
+  });
+  if(tab === 'notes') brRenderNotes();
+  if(tab === 'new' && brCurrentNoteId === null){
+    // clear form
+    ['br-title','br-content'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    const del = document.getElementById('br-del-btn');
+    if(del) del.style.display='none';
+  }
+}
+
+function brRenderNotes(){
+  const q = (document.getElementById('br-search')?.value||'').toLowerCase();
+  const fc = document.getElementById('br-filter-client')?.value || 'Todos';
+  const filtered = brNotes.filter(n=>{
+    const mClient = fc==='Todos' || n.client===fc;
+    const mQ = !q || n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q);
+    return mClient && mQ;
+  });
+  const grid = document.getElementById('br-notes-grid');
+  if(!grid) return;
+  if(!filtered.length){
+    grid.innerHTML='<div class="br-empty">Nenhuma nota encontrada.</div>';
+    return;
+  }
+  const CCOL={'Arena Publicidade':'#d4956a','Nova Beach':'#5bad85','Bowa Bar':'#d4c06a','Geral':'#9b7dbf'};
+  grid.innerHTML = filtered.map(n=>`
+    <div class="br-note-card" onclick="brOpenNote('${n.id}')" style="border-left-color:${CCOL[n.client]||'#00d4ff20'}">
+      <div class="br-note-meta">${n.category} · ${n.client}</div>
+      <div class="br-note-title">${n.title}</div>
+      <div class="br-note-preview">${n.content.replace(/#+\s/g,'').replace(/\*\*/g,'').slice(0,100)}</div>
+    </div>`).join('');
+}
+
+function brOpenNote(id){
+  const n = brNotes.find(x=>x.id===id);
+  if(!n) return;
+  brCurrentNoteId = id;
+  document.getElementById('br-title').value   = n.title;
+  document.getElementById('br-client').value  = n.client;
+  document.getElementById('br-category').value= n.category;
+  document.getElementById('br-content').value = n.content;
+  const del = document.getElementById('br-del-btn');
+  if(del) del.style.display='inline-block';
+  brShowTab('new');
+}
+
+function brSaveNote(){
+  const title   = document.getElementById('br-title')?.value?.trim();
+  const content = document.getElementById('br-content')?.value?.trim();
+  if(!title||!content){ alert('Preencha título e conteúdo.'); return; }
+  const id = brCurrentNoteId || 'br-'+Date.now();
+  const client   = document.getElementById('br-client')?.value || 'Geral';
+  const category = document.getElementById('br-category')?.value || 'Geral';
+  brNotes = [{id,title,client,category,content,upd:Date.now()}, ...brNotes.filter(x=>x.id!==id)];
+  brSave();
+  brCurrentNoteId = null;
+  const del = document.getElementById('br-del-btn');
+  if(del) del.style.display='none';
+  brShowTab('notes');
+}
+
+function brDeleteNote(){
+  if(!brCurrentNoteId || !confirm('Remover esta nota?')) return;
+  brNotes = brNotes.filter(n=>n.id!==brCurrentNoteId);
+  brSave(); brCurrentNoteId=null; brShowTab('notes');
+}
+
+function brSetMode(m){
+  brAiMode = m;
+  document.querySelectorAll('.br-mode-pill').forEach(el=>el.classList.remove('active'));
+  document.getElementById('brmode-'+m)?.classList.add('active');
+}
+
+const BR_MODES = {
+  consult: 'Você é especialista em marketing digital brasileiro. Responda usando o contexto da base de conhecimento. Seja direto e estratégico.',
+  strategy: 'Você é estrategista de marketing digital. Use os perfis e frameworks para criar estratégias com etapas práticas e KPIs definidos.',
+  copy: 'Você é copywriter especialista em tráfego pago no Brasil. Use perfis e frameworks para criar copies prontos com hook, corpo e CTA. Entregue 3 variações.',
+  growth: 'Você é Head de Growth Sênior. Diagnostique gargalos nas 9 camadas (Estratégia/Oferta/Posicionamento/Público/Criativo/Funil/UX/Dados/Infraestrutura), classifique 🟢🟡🔴 e dê plano de ação prático.'
+};
+
+async function brRunAI(){
+  const q = document.getElementById('br-ai-query')?.value?.trim();
+  if(!q) return;
+  const btn = document.getElementById('br-ai-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Consultando...'; }
+  const loading = document.getElementById('br-ai-loading');
+  const wrap    = document.getElementById('br-ai-result-wrap');
+  const result  = document.getElementById('br-ai-result');
+  if(loading) loading.style.display='block';
+  if(wrap) wrap.style.display='none';
+
+  const ctx = brNotes.map(n=>`### ${n.title}\n${n.content}`).join('\n\n---\n\n');
+  const sys = BR_MODES[brAiMode] + `\n\nBASE DE CONHECIMENTO:\n${ctx}`;
+
+  try {
+    const text = await aiCall(sys, q);
+    if(result) result.textContent = text;
+    if(wrap) wrap.style.display='block';
+  } catch(e) {
+    if(result) result.textContent = 'Erro: '+e.message;
+    if(wrap) wrap.style.display='block';
+  }
+  if(loading) loading.style.display='none';
+  if(btn){ btn.disabled=false; btn.textContent='⚡ Consultar Brain'; }
+}
+
+function brSaveAIResult(){
+  const text = document.getElementById('br-ai-result')?.textContent||'';
+  if(!text) return;
+  const n = {id:'br-ai-'+Date.now(),title:`Brain IA — ${new Date().toLocaleDateString('pt-BR')}`,client:'Geral',category:'Geral',content:text,upd:Date.now()};
+  brNotes = [n, ...brNotes];
+  brSave(); alert('Salvo no Brain!');
+}
+
+// Init brain when tab clicked
+document.getElementById('tab-brain')?.addEventListener('click', ()=>{
+  brInit();
+  brShowTab('notes');
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── CARROSSEL ─────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+const CA_BG_COLORS = ['#090909','#0f0f0f','#1a1a1a','#0a0f1e','#0d1117','#1a0a0a','#0a1a0a','#1a0d1a','#fffdf8','#f5f0e8'];
+const CA_ACC_COLORS= ['#00d4ff','#d4956a','#5bad85','#9b7dbf','#6a8eb5','#d4c06a','#e07070','#ffffff','#f5f0e8'];
+const CA_FORMATS   = { square:{w:460,h:460}, portrait:{w:460,h:575}, story:{w:345,h:614} };
+
+let caSlides = [
+  {title:'Por que sua campanha não converte?',body:'A resposta não está no criativo.\nNem no público.\nNem no budget.',cta:'Deslize →',bg:'#090909',acc:'#00d4ff',layout:'hook',titleSize:34},
+  {title:'O problema está nas 9 camadas',body:'A maioria olha só CTR e ROAS.\nMas performance é resultado de:\nEstratégia + Público + Criativo + Funil + UX.',cta:'Continue →',bg:'#0a0f1e',acc:'#d4956a',layout:'classic',titleSize:28},
+];
+let caCurrentSlide = 0;
+let caCurrentFormat = 'square';
+
+function caInit(){
+  caBuildPalettes();
+  caRenderSidebar();
+  caRenderCanvas();
+  caLoadEditor();
+}
+
+function caBuildPalettes(){
+  const buildPal = (id, colors, type) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = colors.map(c=>
+      `<div style="width:20px;height:20px;border-radius:3px;background:${c};cursor:pointer;border:1px solid rgba(255,255,255,.1);flex-shrink:0;transition:transform .15s"
+        title="${c}" onclick="caSetColor('${type}','${c}',this)"
+        onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"
+      ></div>`
+    ).join('');
+  };
+  buildPal('ca-bg-palette',  CA_BG_COLORS,  'bg');
+  buildPal('ca-acc-palette', CA_ACC_COLORS, 'acc');
+}
+
+function caRenderSidebar(){
+  const list = document.getElementById('ca-slide-list');
+  const count= document.getElementById('ca-count');
+  if(count) count.textContent = `(${caSlides.length})`;
+  if(!list) return;
+  list.innerHTML = caSlides.map((s,i)=>`
+    <div class="ca-slide-item ${i===caCurrentSlide?'active':''}" onclick="caGoTo(${i})">
+      <span class="ca-slide-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="ca-slide-txt">${s.title||'(sem título)'}</span>
+      <button class="ca-slide-del" onclick="event.stopPropagation();caDeleteSlide(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
+
+function caLoadEditor(){
+  const s = caSlides[caCurrentSlide];
+  const setVal = (id,v) => { const el=document.getElementById(id); if(el) el.value=v||''; };
+  setVal('ca-ed-title', s.title);
+  setVal('ca-ed-body',  s.body);
+  setVal('ca-ed-cta',   s.cta);
+  const num = document.getElementById('ca-edit-num');
+  if(num) num.textContent = `#${caCurrentSlide+1}`;
+}
+
+function caUpdateCurrent(){
+  const s = caSlides[caCurrentSlide];
+  s.title = document.getElementById('ca-ed-title')?.value || '';
+  s.body  = document.getElementById('ca-ed-body')?.value  || '';
+  s.cta   = document.getElementById('ca-ed-cta')?.value   || '';
+  caRenderCanvas();
+  caRenderSidebar();
+}
+
+function caSetColor(type, color){
+  const s = caSlides[caCurrentSlide];
+  if(type==='bg')  s.bg  = color;
+  if(type==='acc') s.acc = color;
+  caRenderCanvas();
+}
+
+function caGoTo(i){
+  if(i<0||i>=caSlides.length) return;
+  caCurrentSlide = i;
+  caLoadEditor();
+  caRenderCanvas();
+  caRenderSidebar();
+}
+
+function caAddSlide(){
+  const prev = caSlides[caCurrentSlide];
+  caSlides.push({title:'Novo Slide',body:'',cta:'Continue →',bg:prev.bg,acc:prev.acc,layout:'classic',titleSize:28});
+  caGoTo(caSlides.length-1);
+}
+
+function caDuplicateSlide(){
+  caSlides.splice(caCurrentSlide+1,0,JSON.parse(JSON.stringify(caSlides[caCurrentSlide])));
+  caGoTo(caCurrentSlide+1);
+}
+
+function caDeleteSlide(i){
+  if(caSlides.length<=1) return;
+  caSlides.splice(i,1);
+  if(caCurrentSlide>=caSlides.length) caCurrentSlide=caSlides.length-1;
+  caGoTo(caCurrentSlide);
+}
+
+function caRenderCanvas(){
+  const s = caSlides[caCurrentSlide];
+  const f = CA_FORMATS[caCurrentFormat];
+  const canvas = document.getElementById('ca-slide-canvas');
+  if(!canvas) return;
+  canvas.style.width  = f.w+'px';
+  canvas.style.height = f.h+'px';
+  canvas.style.background = s.bg;
+  canvas.innerHTML = caBuildSlideHTML(s, f.w, f.h);
+
+  const counter = document.getElementById('ca-counter');
+  if(counter) counter.textContent = `${caCurrentSlide+1} / ${caSlides.length}`;
+  const prev = document.getElementById('ca-btn-prev');
+  const next = document.getElementById('ca-btn-next');
+  if(prev) prev.disabled = caCurrentSlide===0;
+  if(next) next.disabled = caCurrentSlide===caSlides.length-1;
+
+  const dots = document.getElementById('ca-dots');
+  if(dots) dots.innerHTML = caSlides.map((_,i)=>
+    `<div class="ca-dot ${i===caCurrentSlide?'active':''}" onclick="caGoTo(${i})"></div>`
+  ).join('');
+}
+
+function caEsc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function caBuildSlideHTML(s, w, h){
+  const pad  = Math.round(w*0.08);
+  const ts   = s.titleSize || 28;
+  const bs   = Math.max(10, Math.round(ts*0.42));
+  const cs   = Math.max(9,  Math.round(ts*0.32));
+  const lnH  = s.layout==='hook' ? 1.1 : 1.3;
+  let inner  = '';
+
+  if(s.layout==='hook'){
+    inner = `
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:${ts}px;font-weight:700;line-height:${lnH};color:#ebe7e1;letter-spacing:-.02em">
+          ${caEsc(s.title).replace(/\n/g,'<br>')}
+        </div>
+        ${s.body?`<div style="margin-top:14px;font-size:${bs}px;color:${s.acc};line-height:1.5">${caEsc(s.body).replace(/\n/g,'<br>')}</div>`:''}
+      </div>`;
+  } else {
+    inner = `
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
+        <div style="font-size:${ts}px;font-weight:700;line-height:${lnH};color:#ebe7e1;letter-spacing:-.01em">
+          ${caEsc(s.title).replace(/\n/g,'<br>')}
+        </div>
+        ${s.body?`<div style="width:28px;height:2px;background:${s.acc};border-radius:1px"></div>
+        <div style="font-size:${bs}px;color:#ebe7e1cc;line-height:1.65">${caEsc(s.body).replace(/\n/g,'<br>')}</div>`:''}
+      </div>`;
+  }
+
+  return `
+    <div style="width:100%;height:100%;padding:${pad}px;display:flex;flex-direction:column;font-family:Georgia,serif;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${s.acc},${s.acc}44)"></div>
+      ${inner}
+      ${s.cta?`<div style="margin-top:${Math.round(h*.03)}px;font-size:${cs+1}px;color:${s.acc};font-weight:600;letter-spacing:.03em">${caEsc(s.cta)}</div>`:''}
+      <div style="position:absolute;bottom:${Math.round(h*.04)}px;right:${pad}px;font-size:${cs-2}px;font-family:'Courier New',monospace;color:#ffffff18;letter-spacing:.08em">◈</div>
+    </div>`;
+}
+
+async function caGenerate(){
+  const topic   = document.getElementById('ca-topic')?.value?.trim();
+  if(!topic){ document.getElementById('ca-topic')?.focus(); return; }
+  const client  = document.getElementById('ca-client')?.value || 'Geral';
+  const nSlides = document.getElementById('ca-num-slides')?.value || '7';
+  const tone    = document.getElementById('ca-tone')?.value || 'educativo e direto';
+
+  const btn = document.getElementById('ca-gen-btn');
+  const status = document.getElementById('ca-ai-status');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Gerando...'; }
+  if(status){ status.style.display='block'; status.textContent=`Criando ${nSlides} slides...`; }
+
+  const clientCtx = {
+    'Arena Publicidade':'Público: gestores de marketing B2B, empresas 200+ funcionários. Tom: consultivo, profissional, ROI-focado.',
+    'Nova Beach':'Público: adultos 25-45, classes A/B, beach tennis e lifestyle ativo Campinas. Tom: energético, comunidade.',
+    'Geral':'Público geral de marketing digital, profissionais de tráfego pago.',
+    'livre':''
+  }[client]||'';
+
+  const system = `Você cria slides de carrossel para Instagram. Regras: primeiro slide hook forte | slides do meio com valor real | último slide CTA claro | cada título máximo 8 palavras | corpo máximo 3-4 linhas | sem emojis no título | layout varie entre classic e hook. IMPORTANTE: Retorne SOMENTE JSON válido, sem markdown.`;
+  const user = `Crie ${nSlides} slides sobre: "${topic}"\n${clientCtx?`\nContexto: ${clientCtx}`:''}\nTom: ${tone}\n\nJSON:\n[{"title":"...","body":"...","cta":"...","bg":"#090909","acc":"#00d4ff","layout":"hook|classic","titleSize":32}]`;
+
+  try {
+    const text = await aiCall(system, user);
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    if(Array.isArray(parsed) && parsed.length){
+      caSlides = parsed.map((s,i)=>({
+        title:s.title||'', body:s.body||'', cta:s.cta||'Continue →',
+        bg:s.bg||'#090909', acc:s.acc||'#00d4ff',
+        layout:s.layout||'classic', titleSize:s.titleSize||28
+      }));
+      caCurrentSlide = 0;
+      caGoTo(0);
+      if(status){ status.textContent=`✓ ${caSlides.length} slides criados!`; status.style.color='#5bad85'; }
+    }
+  } catch(e){
+    if(status){ status.textContent=`Erro: ${e.message}`; status.style.color='#e07070'; }
+  }
+
+  if(btn){ btn.disabled=false; btn.textContent='⚡ Gerar Slides com IA'; }
+  setTimeout(()=>{ if(status) status.style.display='none'; if(status) status.style.color='#f0c040'; }, 4000);
+}
+
+function caCopyAll(){
+  const text = caSlides.map((s,i)=>`=== SLIDE ${i+1} ===\n${s.title}\n\n${s.body}\n\nCTA: ${s.cta}`).join('\n\n');
+  const area = document.getElementById('ca-copy-all-area');
+  if(area){ area.textContent=text; area.style.display='block'; }
+  navigator.clipboard.writeText(text).then(()=>{ /* copiado */ }).catch(()=>{});
+}
+
+// Init carrossel when tab clicked
+document.getElementById('tab-carrossel')?.addEventListener('click', ()=>{
+  // small delay to let panel become visible before rendering canvas
+  setTimeout(()=>{ caInit(); }, 60);
+});
 </script>
 </body>
 </html>
